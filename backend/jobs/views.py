@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics
 
-from agent.serializers.input_serializers import ResumeAnalysisSerializer, JobSearchHumanInputSerializer
+from agent.serializers.input_serializers import ResumeAnalysisSerializer, JobSearchInputSerializer
 
 
 from .serializers import JobPostCreateSerializer, JobPostSerializer, JobPostListSerializer
@@ -60,7 +60,7 @@ class ResumeAnalysisView(generics.GenericAPIView):
     
 class GetJobsByAgentView(generics.GenericAPIView):
     # permission_classes = [IsAuthenticated]
-    serializer_class = JobSearchHumanInputSerializer
+    serializer_class = JobSearchInputSerializer
     
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
