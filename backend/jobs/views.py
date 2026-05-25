@@ -1,7 +1,6 @@
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework import generics
+from rest_framework import status, generics
 
 from agent.serializers.input_serializers import ResumeAnalysisSerializer, JobSearchInputSerializer
 
@@ -16,25 +15,17 @@ from .services import analyze_resume_service, get_jobs_by_agent_service
 # Create your views here.
 
 class JobPostListView(generics.ListAPIView):
-
     queryset = JobPost.objects.all()
-
     serializer_class = JobPostListSerializer
-
     permission_classes = [AllowAny]
-
     filterset_class = JobPostFilter
-
     ordering_fields = ["posted_at", "salary"]
 
     ordering = ["-posted_at"]
     
 class JobPostCreateView(generics.CreateAPIView):
-
     queryset = JobPost.objects.all()
-
     serializer_class = JobPostCreateSerializer
-
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):

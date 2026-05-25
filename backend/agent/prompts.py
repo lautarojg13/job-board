@@ -1,3 +1,7 @@
+import json
+from jobs.choices import EmploymentTypes
+
+
 SYSTEM_PROMPTS = {
     "RESUME_ANALYZER_SYSTEM_PROMPT": """
         You are a Senior Technical Recruiter. 
@@ -28,19 +32,32 @@ SYSTEM_PROMPTS = {
         Keys:
         - "keywords": (string) Main technologies or job titles mentioned.
         - "location": (string) City or country mentioned, or empty string.
-        - "remote": (boolean) True if 'remote', 'home office' or a similar concept in {language} is mentioned.
         - "min_salary": (int) Minimum salary mentioned, or 0 if not specified.
-        - "job_type": (string) Options: 'full-time', 'part-time', 'contract', or null.
+        - "employment_type": (string)
+        
+        EMPLOYMENT TYPE RULES:
+        Choose ONLY one of these values if applicable:
+        {employment_choices}
+
+        Return the VALUE, not the label.
     """
     
 }
-def format_prompt(prompt, language):
-    return prompt.format(language=language)
+def format_prompt(prompt, **kwargs):
+    return prompt.format(**kwargs)
 
 def get_resume_analyzer_prompt(language):
     prompt = SYSTEM_PROMPTS["RESUME_ANALYZER_SYSTEM_PROMPT"]
     return format_prompt(prompt, language)
 
 def get_jobs_search_prompt(language):
+    employment_choices = json.dumps([
+        {
+            "value": value,
+            "label": label
+        }
+        for value, label in EmploymentTypes.choices
+    ])
+    
     prompt = SYSTEM_PROMPTS["JOB_SEARCH_SYSTEM_PROMPT"]
-    return format_prompt(prompt, language)
+    return format_prompt(prompt, language=language, employment_choices=employment_choices)
