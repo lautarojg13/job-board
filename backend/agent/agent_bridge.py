@@ -17,10 +17,13 @@ class Agent:
         
         return self.call_model(system_prompt=system_prompt, user_prompt=user_prompt)
     
-    def search_jobs(self, user_input):
+    def search_job_params(self, user_prompt, errors=None):
         system_prompt = get_jobs_search_prompt(self.language)
-        user_prompt = f"User_prompt: {user_input}"
         
+        if errors:
+            error_feedback = f"\n\nPrevious validation errors: {errors}. Please fix them."
+            user_prompt = f"User input: {user_prompt}{error_feedback}"
+            
         return self.call_model(system_prompt, user_prompt)
         
     
