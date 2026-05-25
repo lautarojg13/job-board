@@ -21,7 +21,7 @@ SYSTEM_PROMPTS = {
 
         TASK:
         Translate the natural language user query into structured database filters.
-        If a specific parameter is not mentioned in the query, return an empty string or null as specified.
+        If a specific parameter is not mentioned in the query, return null as value for that parameter.
 
         OUTPUT FORMAT:
         Return ONLY a JSON object. No conversational text.
