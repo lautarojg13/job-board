@@ -55,7 +55,7 @@ def get_jobs_by_agent_service(user_prompt):
 
     query = Q()
 
-    for keyword in valid_data.get('keywords', []):
+    for keyword in valid_data.get('technologies', []):
         query |= (
             Q(title__icontains=keyword) |
             Q(description__icontains=keyword)
