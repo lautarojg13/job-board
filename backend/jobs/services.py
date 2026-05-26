@@ -6,7 +6,7 @@ from .utils.info import get_job_post_info
 
 from jobs.models import JobPost
 
-from agent.agent_bridge import Agent
+from agent.assistants import JobAssistantAgent
 from agent.serializers.output_serializers import JobParamsResponseSerializer
 
 
@@ -20,7 +20,7 @@ def analyze_resume_service(resume_file, job_id):
     if not resume_content:
         raise ValidationError("Could not extract text from PDF")
 
-    agent = Agent()
+    agent = JobAssistantAgent()
     analysis = agent.analyze_resume_compatibility(
         resume_content=resume_content,
         job_post_info=job_post_info
@@ -32,7 +32,7 @@ def analyze_resume_service(resume_file, job_id):
     return analysis
 
 def get_jobs_by_agent_service(user_prompt):
-    agent = Agent()
+    agent = JobAssistantAgent()
     last_errors = None
     attempt = 0
     
