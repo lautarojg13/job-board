@@ -1,17 +1,17 @@
 from rest_framework.exceptions import ValidationError
-from django.db.models import Q
 
 from .utils.pdf_handler import extract_text_from_pdf
 from .utils.info import get_job_post_info
+from .utils.asyncronous.querysets import build_jobs_queryset
 
-from jobs.models import JobPost
+from asgiref.sync import sync_to_async
 
 from agent.assistants import JobAssistantAgent
 from agent.serializers.output_serializers import JobParamsResponseSerializer
 
 
-def analyze_resume_service(resume_file, job_id):
-    job_post_info = get_job_post_info(job_id)
+async def analyze_resume_service(resume_file, job_id):
+    job_post_info = await sync_to_async(get_job_post_info)(job_id)
     
     if not resume_file:
         raise ValidationError("No resume file provided")
@@ -21,7 +21,7 @@ def analyze_resume_service(resume_file, job_id):
         raise ValidationError("Could not extract text from PDF")
 
     agent = JobAssistantAgent()
-    analysis = agent.analyze_resume_compatibility(
+    analysis = await agent.analyze_resume_compatibility(
         resume_content=resume_content,
         job_post_info=job_post_info
     )
@@ -31,13 +31,13 @@ def analyze_resume_service(resume_file, job_id):
     
     return analysis
 
-def get_jobs_by_agent_service(user_prompt):
+async def get_jobs_by_agent_service(user_prompt):
     agent = JobAssistantAgent()
     last_errors = None
     attempt = 0
     
     while attempt < 3:
-        params = agent.search_job_params(user_prompt, errors=last_errors)
+        params = await agent.search_job_params(user_prompt, errors=last_errors)
         serializer = JobParamsResponseSerializer(data=params)
         
         if serializer.is_valid():
@@ -51,30 +51,6 @@ def get_jobs_by_agent_service(user_prompt):
     
     valid_data = serializer.validated_data
 
-    queryset = JobPost.objects.all()
-
-    query = Q()
-
-    for keyword in valid_data.get('technologies', []):
-        query |= (
-            Q(title__icontains=keyword) |
-            Q(description__icontains=keyword)
-        )
-    queryset = queryset.filter(query)
-
-    if valid_data.get('location'):
-        queryset = queryset.filter(
-            location__icontains=valid_data['location']
-        )
-
-    if valid_data.get('employment_type') is not None:
-        queryset = queryset.filter(
-            employment_type=valid_data['employment_type']
-        )
-
-    if valid_data.get('min_salary'):
-        queryset = queryset.filter(
-            salary__gte=valid_data['min_salary']
-        )
+    queryset = await sync_to_async(list)(build_jobs_queryset(valid_data))
 
     return queryset

@@ -1,4 +1,4 @@
-import requests
+import httpx
 import json
 from django.conf import settings
 
@@ -8,7 +8,7 @@ class Agent:
         self.model = getattr(settings, "OLLAMA_MODEL_NAME", "llama3:8b-instruct-q4_K_M")
         self.language = language
     
-    def call_model(self, system_prompt, user_prompt, format="json", temperature=0.0):
+    async def call_model(self, system_prompt, user_prompt, format="json", temperature=0.0):
         system_prompt += f"\n You must respond in {self.language}"
         data = {
             "model": self.model,
@@ -20,10 +20,13 @@ class Agent:
             }
         }
         
+        limits = httpx.Limits(max_keepalive_connections=5, max_connections=10)
+        
         try:
-            response = requests.post(self.url, json=data)
-            response.raise_for_status()
-            result = response.json().get("response", "{}")
-            return json.loads(result)
-        except (requests.RequestException, json.JSONDecodeError) as e:
+            async with httpx.AsyncClient(timeout=60.0, limits=limits) as client:
+                response = client.post(self.url, json=data)
+                response.raise_for_status()
+                result = response.json().get("response", "{}")
+                return json.loads(result)
+        except (httpx.HTTPError, json.JSONDecodeError) as e:
             return {"error":"AI service error.", "details": str(e)}
