@@ -9,5 +9,9 @@ class JobPostStatus(models.TextChoices):
 class EmploymentTypes(models.TextChoices):
     FULL_TIME = 'FT', 'Full-Time'
     PART_TIME = 'PT', 'Part-Time'
-    REMOTE = 'RM', 'Remote'
     CONTRACT = 'CT', 'Contract'
+    
+class WorkModeChoices(models.TextChoices):
+    HYBRID = 'hybrid', 'Hybrid'
+    ONSITE = 'onsite', 'Onsite'
+    REMOTE = 'remote', 'Remote'

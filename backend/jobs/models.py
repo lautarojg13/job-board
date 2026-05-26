@@ -5,7 +5,7 @@ from companies.models import Company
 
 from .managers import JobPostManager
 
-from .choices import JobPostStatus, EmploymentTypes
+from .choices import JobPostStatus, EmploymentTypes, WorkModeChoices
 
 # Create your models here.
 
@@ -15,6 +15,11 @@ class JobPost(models.Model):
     
     company = models.ForeignKey(Company,on_delete = models.CASCADE, related_name="jobs", null=True, blank=True)
     location = models.CharField(max_length=255, blank=True, null=True)
+    work_mode = models.CharField(
+        max_length=20,
+        choices=WorkModeChoices.choices,
+        default=WorkModeChoices.ONSITE
+    )
     
     
     status = models.CharField(

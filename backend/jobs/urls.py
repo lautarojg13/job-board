@@ -11,5 +11,6 @@ urlpatterns = [
     path("delete-job-post/<int:pk>/", views.JobPostRetrieveUpdateDestroyView.as_view(), name="delete_job_post"),
     path("get-job-details/<int:job_id>/", views.JobPostRetrieveView.as_view(), name="get_job_details"),
 
-    path("get_resume_analysis/<int:job_id>", views.ResumeAnalysisView.as_view(), name="get_resume_analysis")
+    path("get_resume_analysis/<int:job_id>/", views.ResumeAnalysisView.as_view(), name="get_resume_analysis"),
+    path("get_jobs_by_agent/", views.GetJobsByAgentView.as_view(), name="get_jobs_by_agent")
 ]
