@@ -89,7 +89,9 @@ class TestJobPostListSerializer:
             'title',
             'company',
             'location',
+            'description',
             'status',
+            'work_mode',
             'employment_type',
             'salary',
         }

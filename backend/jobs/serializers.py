@@ -6,13 +6,13 @@ from .models import JobPost
 class JobPostSerializer(ModelSerializer):
     class Meta:
         model = JobPost
-        fields = ['id', 'title', 'description', 'company', 'location', 'posted_by', 'posted_at', 'status', 'employment_type', 'salary']
+        fields = ['id', 'title', 'description', 'company', 'location', 'posted_by', 'posted_at', 'status', 'employment_type', 'salary', 'work_mode']
         read_only_fields = ('posted_by','company')
         
 class JobPostListSerializer(ModelSerializer):
     class Meta:
         model = JobPost
-        fields = ['id', 'title', 'description', 'company', 'location', 'status', 'employment_type', 'salary']
+        fields = ['id', 'title', 'description', 'company', 'location', 'status', 'employment_type', 'salary', 'work_mode']
         
 class JobPostCreateSerializer(ModelSerializer):
 
@@ -26,7 +26,8 @@ class JobPostCreateSerializer(ModelSerializer):
             'location',
             'status',
             'employment_type',
-            'salary'
+            'salary',
+            'work_mode'
         ]
 
     def validate_company(self, value):
