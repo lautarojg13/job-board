@@ -1,5 +1,5 @@
 import json
-from jobs.choices import EmploymentTypes
+from jobs.choices import EmploymentTypes, WorkModeChoices
 
 
 SYSTEM_PROMPTS = {
@@ -30,14 +30,21 @@ SYSTEM_PROMPTS = {
         OUTPUT FORMAT:
         Return ONLY a JSON object. No conversational text.
         Keys:
-        - "keywords": (string) Main technologies or job titles mentioned.
-        - "location": (string) City or country mentioned, or empty string.
+        - "technologies": (string | []) Main technologies mentioned, such as frameworks, libraries, programming languages, etc.
+        - "location": (string|null) City or country mentioned.
         - "min_salary": (int) Minimum salary mentioned, or 0 if not specified.
-        - "employment_type": (string)
+        - "employment_type": (string|null)
+        - "work_mode": (string|null)
         
-        EMPLOYMENT TYPE RULES:
+        TECHNOLOGIES RULES:
+        - Include either full name and abreviations for mentioned ones, for example: if user prompts says "JS jobs", you should include both "JS" and "Javascript"  
+        
+        EMPLOYMENT TYPE and WORK MODE:
         Choose ONLY one of these values if applicable:
-        {employment_choices}
+        
+        - employment_choices: {employment_choices}
+        
+        - work_mode: {work_mode_choices}
 
         Return the VALUE, not the label.
     """
@@ -59,5 +66,13 @@ def get_jobs_search_prompt(language):
         for value, label in EmploymentTypes.choices
     ])
     
+    work_mode_choices = json.dumps([
+        {
+            "value": value,
+            "label": label
+        }
+        for value, label in WorkModeChoices.choices
+    ])
+    
     prompt = SYSTEM_PROMPTS["JOB_SEARCH_SYSTEM_PROMPT"]
-    return format_prompt(prompt, language=language, employment_choices=employment_choices)
+    return format_prompt(prompt, language=language, employment_choices=employment_choices, work_mode_choices=work_mode_choices)
