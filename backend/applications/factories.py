@@ -5,8 +5,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 from applications.models import Application, ApplicationResponse
 
-from tests.factories.users import CustomUserFactory
-from tests.factories.jobs import JobPostFactory
+from users.factories import CustomUserFactory
+from jobs.factories import JobPostFactory
 
 
 class ApplicationFactory(DjangoModelFactory):

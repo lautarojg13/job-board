@@ -4,7 +4,7 @@ from factory.django import DjangoModelFactory
 
 from companies.models import Company
 
-from tests.factories.users import CustomUserFactory
+from users.factories import CustomUserFactory
 
 
 class CompanyFactory(DjangoModelFactory):
