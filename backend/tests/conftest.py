@@ -1,7 +1,7 @@
 import pytest
 from rest_framework.test import APIRequestFactory
 
-from tests.factories.users import CustomUserFactory
+from users.factories import CustomUserFactory
 from users.models import CustomUser
 from companies.models import Company
 from jobs.models import JobPost
