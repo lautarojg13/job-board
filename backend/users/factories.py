@@ -19,9 +19,8 @@ class CustomUserFactory(DjangoModelFactory):
 )
     
     password = factory.LazyAttribute(
-        lambda obj: make_password(f"{obj.username}_test_parssword")
+        lambda obj: make_password(f"{obj.username}_test_password")
     )
-    
     
     first_name = factory.Faker('first_name')
     last_name = factory.Faker('last_name')
