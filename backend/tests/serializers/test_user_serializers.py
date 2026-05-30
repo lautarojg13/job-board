@@ -11,6 +11,8 @@ from users.serializers import (
 )
 from users.models import CustomUser
 
+from users.choices import UserRoleChoices
+
 
 class TestLoginUserSerializer:
     """Tests for LoginUserSerializer"""
@@ -194,7 +196,7 @@ class TestCustomUserRegistrationSerializer:
             'password2': 'TestPass123!',
             'first_name': 'John',
             'last_name': 'Doe',
-            'role': 'dev'
+            'role': UserRoleChoices.CANDIDATE
         }
         
         serializer = CustomUserRegistrationSerializer(data=data)
@@ -206,7 +208,7 @@ class TestCustomUserRegistrationSerializer:
         assert user.email == 'newuser@test.com'
         assert user.first_name == 'John'
         assert user.last_name == 'Doe'
-        assert user.role == 'dev'
+        assert user.role == UserRoleChoices.CANDIDATE
 
     @pytest.mark.django_db
     def test_register_passwords_mismatch_raises_error(self):
@@ -322,7 +324,7 @@ class TestCustomUserRegistrationSerializer:
         assert serializer.is_valid()
         
         user = serializer.save()
-        assert user.role == 'dev'
+        assert user.role == UserRoleChoices.CANDIDATE
 
     @pytest.mark.django_db
     def test_register_password_hashed_not_plaintext(self):

@@ -109,8 +109,7 @@ def test_duplicated_email():
         "username": "user1",
         "email": "repetido@mail.com",
         "password": "password123",
-        "password2": "password123",
-        "role": "dev"
+        "password2": "password123"
     }
     
     client.post(reverse("register_user"), data=data)
