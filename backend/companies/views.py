@@ -29,8 +29,14 @@ class CompanyRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     lookup_field = "id"
     lookup_url_kwarg = "company_id"
     
-    def get_queryset(self):
-        return Company.objects.all()
+    def perform_update(self, serializer):
+        
+        company = self.get_object()
+        
+        if company.owner != self.request.user:
+            raise PermissionDenied()
+        
+        return serializer.save()
     
 class CompanyJobListView(generics.ListAPIView):
     serializer_class = JobPostListSerializer
