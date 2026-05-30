@@ -3,7 +3,7 @@ from factory.django import DjangoModelFactory
 from jobs.models import JobPost
 from jobs.choices import JobPostStatus, EmploymentTypes
 
-from tests.factories.users import CustomUserFactory
+from users.factories import CustomUserFactory
 
 import factory
 

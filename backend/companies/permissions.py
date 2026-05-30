@@ -1,4 +1,6 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
+from .models import CompanyMember
+from .choices import CompanyRoleChoices
 
 
 class IsCompanyOwner(BasePermission):
@@ -7,4 +9,8 @@ class IsCompanyOwner(BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
             return True
-        return obj.owner == request.user
+        return CompanyMember.objects.filter(
+            company=obj,
+            user=request.user,
+            company_role=CompanyRoleChoices.OWNER
+        ).exists()

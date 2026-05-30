@@ -3,7 +3,7 @@ import pytest
 from applications.serializers import ApplicationCreateSerializer, ApplicationDetailSerializer, ApplicationListSerializer, ApplicationResponseSerializer, ApplicationStatusUpdateSerializer
 from applications.choices import ApplicationStatus
 
-from tests.factories.applications import ApplicationFactory, ApplicationResponseFactory
+from applications.factories import ApplicationFactory, ApplicationResponseFactory
 
 class TestApplicationCreateSerializer:
     

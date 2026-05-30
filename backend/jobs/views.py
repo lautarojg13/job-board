@@ -38,27 +38,27 @@ class ResumeAnalysisView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ResumeAnalysisSerializer
 
-    def post(self, request, *args, **kwargs):
+    async def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         resume_file = serializer.validated_data['resume']
         job_id = self.kwargs.get("job_id")
 
-        analysis = analyze_resume_service(resume_file, job_id)
+        analysis = await analyze_resume_service(resume_file, job_id)
 
         return Response(analysis, status=status.HTTP_200_OK)
     
 class GetJobsByAgentView(generics.GenericAPIView):
     serializer_class = JobSearchInputSerializer
     
-    def post(self, request, *args, **kwargs):
+    async def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         user_prompt = serializer.validated_data["user_prompt"]
         
-        jobs = get_jobs_by_agent_service(user_prompt)
+        jobs = await get_jobs_by_agent_service(user_prompt)
         
         result = JobPostListSerializer(jobs, many=True).data
         return Response({"detail":result}, status=status.HTTP_200_OK)

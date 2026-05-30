@@ -1,9 +1,10 @@
 import pytest
 from rest_framework.test import APIRequestFactory
 
-from tests.factories.users import CustomUserFactory
+from users.factories import CustomUserFactory
 from users.models import CustomUser
-from companies.models import Company
+from companies.models import Company, CompanyMember
+from companies.choices import CompanyRoleChoices
 from jobs.models import JobPost
 from jobs.choices import JobPostStatus, EmploymentTypes
 from applications.models import Application
@@ -55,7 +56,13 @@ def user():
 
 @pytest.fixture
 def company(user):
-    return Company.objects.create(owner=user, name="random_company")
+    comp = Company.objects.create(name="random_company")
+    CompanyMember.objects.create(
+        company=comp,
+        user=user,
+        company_role=CompanyRoleChoices.OWNER
+    )
+    return comp
 
 @pytest.fixture
 def job(user,company):

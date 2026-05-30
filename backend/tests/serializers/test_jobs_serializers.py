@@ -3,7 +3,7 @@ import pytest
 from jobs.serializers import JobPostCreateSerializer, JobPostListSerializer
 
 from tests.conftest import CustomUserFactory
-from tests.factories.jobs import JobPostFactory
+from jobs.factories import JobPostFactory
 
 
 class TestJobPostCreateSerializer:
@@ -89,7 +89,9 @@ class TestJobPostListSerializer:
             'title',
             'company',
             'location',
+            'description',
             'status',
+            'work_mode',
             'employment_type',
             'salary',
         }

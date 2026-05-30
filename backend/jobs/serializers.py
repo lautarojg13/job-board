@@ -2,17 +2,20 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer
 
 from .models import JobPost
+from companies.models import CompanyMember
+from companies.choices import CompanyRoleChoices
+
 
 class JobPostSerializer(ModelSerializer):
     class Meta:
         model = JobPost
-        fields = ['id', 'title', 'description', 'company', 'location', 'posted_by', 'posted_at', 'status', 'employment_type', 'salary']
+        fields = ['id', 'title', 'description', 'company', 'location', 'posted_by', 'posted_at', 'status', 'employment_type', 'salary', 'work_mode']
         read_only_fields = ('posted_by','company')
         
 class JobPostListSerializer(ModelSerializer):
     class Meta:
         model = JobPost
-        fields = ['id', 'title', 'description', 'company', 'location', 'status', 'employment_type', 'salary']
+        fields = ['id', 'title', 'description', 'company', 'location', 'status', 'employment_type', 'salary', 'work_mode']
         
 class JobPostCreateSerializer(ModelSerializer):
 
@@ -26,17 +29,20 @@ class JobPostCreateSerializer(ModelSerializer):
             'location',
             'status',
             'employment_type',
-            'salary'
+            'salary',
+            'work_mode'
         ]
 
     def validate_company(self, value):
-
         user = self.context['request'].user
 
-        is_owner = value.owner == user
-        is_admin = value.admins.filter(id=user.id).exists()
+        is_member = CompanyMember.objects.filter(
+            company=value,
+            user=user,
+            company_role__in=[CompanyRoleChoices.OWNER, CompanyRoleChoices.RECRUITER]
+        ).exists()
 
-        if not (is_owner or is_admin):
+        if not is_member:
             raise ValidationError(
                 "You cannot post new jobs in this company."
             )
