@@ -2,6 +2,9 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer
 
 from .models import JobPost
+from companies.models import CompanyMember
+from companies.choices import CompanyRoleChoices
+
 
 class JobPostSerializer(ModelSerializer):
     class Meta:
@@ -31,13 +34,15 @@ class JobPostCreateSerializer(ModelSerializer):
         ]
 
     def validate_company(self, value):
-
         user = self.context['request'].user
 
-        is_owner = value.owner == user
-        is_admin = value.admins.filter(id=user.id).exists()
+        is_member = CompanyMember.objects.filter(
+            company=value,
+            user=user,
+            company_role__in=[CompanyRoleChoices.OWNER, CompanyRoleChoices.RECRUITER]
+        ).exists()
 
-        if not (is_owner or is_admin):
+        if not is_member:
             raise ValidationError(
                 "You cannot post new jobs in this company."
             )
