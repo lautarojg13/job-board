@@ -24,7 +24,7 @@ class Agent:
         
         try:
             async with httpx.AsyncClient(timeout=60.0, limits=limits) as client:
-                response = client.post(self.url, json=data)
+                response = await client.post(self.url, json=data)
                 response.raise_for_status()
                 result = response.json().get("response", "{}")
                 return json.loads(result)
