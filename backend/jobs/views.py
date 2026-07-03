@@ -1,7 +1,7 @@
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework import status, generics
-from rest_framework.decorators import APIView, api_view
+from rest_framework.decorators import APIView
 
 from agent.serializers.input_serializers import ResumeAnalysisSerializer, JobSearchInputSerializer
 
@@ -10,8 +10,7 @@ from jobs.permissions import IsJobOwner
 from jobs.filters import JobPostFilter
 from jobs.choices import JobPostStatus
 from jobs.models import JobPost
-from jobs.services import analyze_resume_service
-from jobs.tasks import process_ai_search
+from jobs.tasks import process_ai_search_task, analyze_resume_task
 
 from celery.result import AsyncResult
 
@@ -48,9 +47,9 @@ class ResumeAnalysisView(generics.GenericAPIView):
         resume_file = serializer.validated_data['resume']
         job_id = self.kwargs.get("job_id")
 
-        analysis = await analyze_resume_service(resume_file, job_id)
+        task = analyze_resume_task.delay(job_id, resume_file)
 
-        return Response(analysis, status=status.HTTP_200_OK)
+        return Response({"task_id": task.id, "message": "Análisis de CV iniciado"}, status=status.HTTP_202_ACCEPTED)
 
 class GetJobsByAgentView(generics.GenericAPIView):
     serializer_class = JobSearchInputSerializer
@@ -61,7 +60,7 @@ class GetJobsByAgentView(generics.GenericAPIView):
         
         user_prompt = serializer.validated_data["user_prompt"]
         
-        task = process_ai_search.delay(user_prompt)
+        task = process_ai_search_task.delay(user_prompt)
         
         return Response({"task_id": task.id, "message": "Searching for jobs..."}, status=status.HTTP_202_ACCEPTED)
 
