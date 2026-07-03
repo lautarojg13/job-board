@@ -55,7 +55,7 @@ def format_prompt(prompt, **kwargs):
 
 def get_resume_analyzer_prompt(language):
     prompt = SYSTEM_PROMPTS["RESUME_ANALYZER_SYSTEM_PROMPT"]
-    return format_prompt(prompt, language)
+    return format_prompt(prompt, language=language)
 
 def get_jobs_search_prompt(language):
     employment_choices = json.dumps([

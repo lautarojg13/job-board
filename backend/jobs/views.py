@@ -1,16 +1,18 @@
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework import status, generics
+from rest_framework.decorators import APIView
 
 from agent.serializers.input_serializers import ResumeAnalysisSerializer, JobSearchInputSerializer
 
+from jobs.serializers import JobPostCreateSerializer, JobPostSerializer, JobPostListSerializer
+from jobs.permissions import IsJobOwner
+from jobs.filters import JobPostFilter
+from jobs.choices import JobPostStatus
+from jobs.models import JobPost
+from jobs.tasks import process_ai_search_task, analyze_resume_task
 
-from .serializers import JobPostCreateSerializer, JobPostSerializer, JobPostListSerializer
-from .permissions import IsJobOwner
-from .filters import JobPostFilter
-from .choices import JobPostStatus
-from .models import JobPost
-from .services import analyze_resume_service, get_jobs_by_agent_service
+from celery.result import AsyncResult
 
 # Create your views here.
 
@@ -45,10 +47,10 @@ class ResumeAnalysisView(generics.GenericAPIView):
         resume_file = serializer.validated_data['resume']
         job_id = self.kwargs.get("job_id")
 
-        analysis = await analyze_resume_service(resume_file, job_id)
+        task = analyze_resume_task.delay(job_id, resume_file)
 
-        return Response(analysis, status=status.HTTP_200_OK)
-    
+        return Response({"task_id": task.id, "message": "Análisis de CV iniciado"}, status=status.HTTP_202_ACCEPTED)
+
 class GetJobsByAgentView(generics.GenericAPIView):
     serializer_class = JobSearchInputSerializer
     
@@ -58,10 +60,9 @@ class GetJobsByAgentView(generics.GenericAPIView):
         
         user_prompt = serializer.validated_data["user_prompt"]
         
-        jobs = await get_jobs_by_agent_service(user_prompt)
+        task = process_ai_search_task.delay(user_prompt)
         
-        result = JobPostListSerializer(jobs, many=True).data
-        return Response({"detail":result}, status=status.HTTP_200_OK)
+        return Response({"task_id": task.id, "message": "Searching for jobs..."}, status=status.HTTP_202_ACCEPTED)
 
 class GetOwnerJobPostListView(generics.ListAPIView):
     serializer_class = JobPostSerializer
@@ -93,3 +94,14 @@ class JobPostRetrieveView(generics.RetrieveAPIView):
         return JobPost.objects.filter(
             id=self.kwargs["job_id"]
         )
+
+class TaskStatusView(APIView):
+
+    def get(self, request, task_id, *args, **kwargs):
+        task_result = AsyncResult(task_id)
+        
+        return Response({
+            "task_id": task_id,
+            "status": task_result.status,
+            "result": task_result.result if task_result.ready() else None
+        })

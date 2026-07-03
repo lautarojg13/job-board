@@ -12,5 +12,7 @@ urlpatterns = [
     path("get-job-details/<int:job_id>/", views.JobPostRetrieveView.as_view(), name="get_job_details"),
 
     path("get_resume_analysis/<int:job_id>/", views.ResumeAnalysisView.as_view(), name="get_resume_analysis"),
-    path("get_jobs_by_agent/", views.GetJobsByAgentView.as_view(), name="get_jobs_by_agent")
+    path("get_jobs_by_agent/", views.GetJobsByAgentView.as_view(), name="get_jobs_by_agent"),
+    
+    path("task-status/<str:task_id>/", views.TaskStatusView.as_view(), name="task_status"),
 ]
