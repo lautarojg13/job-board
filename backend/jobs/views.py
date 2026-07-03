@@ -48,7 +48,7 @@ class ResumeAnalysisView(generics.GenericAPIView):
         analysis = await analyze_resume_service(resume_file, job_id)
 
         return Response(analysis, status=status.HTTP_200_OK)
-    
+
 class GetJobsByAgentView(generics.GenericAPIView):
     serializer_class = JobSearchInputSerializer
     
@@ -58,10 +58,9 @@ class GetJobsByAgentView(generics.GenericAPIView):
         
         user_prompt = serializer.validated_data["user_prompt"]
         
-        jobs = await get_jobs_by_agent_service(user_prompt)
+        task = process_ai_search.delay(user_prompt)
         
-        result = JobPostListSerializer(jobs, many=True).data
-        return Response({"detail":result}, status=status.HTTP_200_OK)
+        return Response({"task_id": task.id, "message": "Searching for jobs..."}, status=status.HTTP_202_ACCEPTED)
 
 class GetOwnerJobPostListView(generics.ListAPIView):
     serializer_class = JobPostSerializer
