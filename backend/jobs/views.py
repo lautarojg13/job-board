@@ -11,6 +11,7 @@ from jobs.filters import JobPostFilter
 from jobs.choices import JobPostStatus
 from jobs.models import JobPost
 from jobs.services import analyze_resume_service
+from jobs.tasks import process_ai_search
 
 from celery.result import AsyncResult
 
