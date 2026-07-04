@@ -6,8 +6,8 @@ from .utils.asyncronous.querysets import build_jobs_queryset
 
 from asgiref.sync import sync_to_async
 
-from agent.assistants import JobAssistantAgent
-from agent.serializers.output_serializers import JobParamsResponseSerializer
+from backend.agents.assistants import JobAssistantAgent
+from backend.agents.serializers.output_serializers import JobParamsResponseSerializer
 
 
 async def analyze_resume_service(resume_file, job_id):
