@@ -1,6 +1,6 @@
-from .agent_bridge import Agent
+from agent.agent_bridge import Agent
 
-from .prompts import get_resume_analyzer_prompt, get_jobs_search_prompt
+from agent.prompts import get_resume_analyzer_prompt, get_jobs_search_prompt
 
 class JobAssistantAgent(Agent):
     async def analyze_resume_compatibility(self, resume_content, job_post_info):
