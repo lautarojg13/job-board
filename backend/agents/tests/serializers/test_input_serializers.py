@@ -1,3 +1,7 @@
+
+
+import pytest
+
 from agents.serializers.input_serializers import ResumeAnalysisSerializer, JobSearchInputSerializer
 
 from django.core.files.uploadedfile import SimpleUploadedFile
