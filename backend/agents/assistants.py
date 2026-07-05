@@ -1,8 +1,12 @@
+from abc import ABC
+
 from agents.agent_bridge import Agent
 
 from agents.prompts import get_resume_analyzer_prompt, get_jobs_search_prompt
 
-class JobAssistantAgent(Agent):
+
+
+class JobAssistantAgent(Agent, ABC):
     async def analyze_resume_compatibility(self, resume_content, job_post_info):
         system_prompt = get_resume_analyzer_prompt(self.language)
         
