@@ -1,13 +1,13 @@
 from rest_framework.exceptions import ValidationError
 
-from .utils.pdf_handler import extract_text_from_pdf
-from .utils.info import get_job_post_info
-from .utils.asyncronous.querysets import build_jobs_queryset
+from jobs.utils.pdf_handler import extract_text_from_pdf
+from jobs.utils.info import get_job_post_info
+from jobs.utils.asyncronous.querysets import build_jobs_queryset
 
 from asgiref.sync import sync_to_async
 
-from backend.agents.assistants import JobAssistantAgent
-from backend.agents.serializers.output_serializers import JobParamsResponseSerializer
+from agents.assistants import JobAssistantAgent
+from agents.serializers.output_serializers import JobParamsResponseSerializer
 
 
 async def analyze_resume_service(resume_file, job_id):

@@ -2,7 +2,9 @@ import httpx
 import json
 from django.conf import settings
 
-class Agent:
+from abc import ABC
+
+class Agent(ABC):
     """
     Agent class for interacting with the Ollama API to generate responses 
     using large language models.
