@@ -6,8 +6,6 @@ import pytest
 from agents.agent_bridge import Agent
 
 
-
-
 class TestAgent:
     @pytest.fixture
     def agent(self):

@@ -2,9 +2,7 @@ import httpx
 import json
 from django.conf import settings
 
-from abc import ABC, abstractmethod
-
-class Agent(ABC):
+class Agent:
     """
     Agent class for interacting with the Ollama API to generate responses 
     using large language models.
@@ -26,7 +24,6 @@ class Agent(ABC):
         self.model = getattr(settings, "OLLAMA_MODEL_NAME", "llama3:8b-instruct-q4_K_M")
         self.language = language
     
-    @abstractmethod
     async def call_model(self, system_prompt, user_prompt, format="json", temperature=0.0):
         """
         Call the language model with specified prompts and return the response.
