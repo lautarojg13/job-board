@@ -48,12 +48,14 @@ class TestSearchJobParams:
 
         agent.call_model = AsyncMock(return_value={})
 
+        user_prompt = "Python remote developer"
+
         await agent.search_job_params(
-            "Python",
+            user_prompt=user_prompt,
             errors="location invalid"
         )
 
         kwargs = agent.call_model.await_args.kwargs
 
-        assert "User input: Python" in kwargs["user_prompt"]
+        assert f"User input: {user_prompt}" in kwargs["user_prompt"]
         assert "Previous validation errors" in kwargs["user_prompt"]

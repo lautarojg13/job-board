@@ -21,5 +21,5 @@ class JobAssistantAgent(Agent, ABC):
             error_feedback = f"\n\nPrevious validation errors: {errors}. Please fix them."
             user_prompt = f"User input: {user_prompt}{error_feedback}"
             
-        return await self.call_model(system_prompt, user_prompt)
+        return await self.call_model(system_prompt=system_prompt, user_prompt=user_prompt)
         
