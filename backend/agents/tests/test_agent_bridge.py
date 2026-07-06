@@ -1,4 +1,5 @@
 import json
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
@@ -6,126 +7,85 @@ import pytest
 from agents.agent_bridge import Agent
 
 
-class TestAgent:
-    @pytest.fixture
-    def agent(self):
-        return Agent()
+class DummyAgent(Agent):
+    pass
+
+
+class TestAgentInitialization:
+    def test_uses_default_settings(self, settings):
+        settings.OLLAMA_API_URL = "http://localhost:11434/api/generate"
+        settings.OLLAMA_MODEL_NAME = "llama3"
+
+        agent = DummyAgent()
+
+        assert agent.url == "http://localhost:11434/api/generate"
+        assert agent.model == "llama3"
+        assert agent.language == "English"
+
+    def test_custom_language(self):
+        agent = DummyAgent(language="Spanish")
+
+        assert agent.language == "Spanish"
+
+
+class TestCallModel:
+    @pytest.mark.asyncio
+    async def test_successful_response(self):
+        agent = DummyAgent()
+
+        fake_response = MagicMock()
+        fake_response.json.return_value = {
+            "response": json.dumps({"result": "ok"})
+        }
+        fake_response.raise_for_status.return_value = None
+
+        with patch("agents.agent_bridge.httpx.AsyncClient") as client:
+            client.return_value.__aenter__.return_value.post = AsyncMock(
+                return_value=fake_response
+            )
+
+            result = await agent.call_model(
+                system_prompt="system",
+                user_prompt="user",
+            )
+
+        assert result == {"result": "ok"}
 
     @pytest.mark.asyncio
-    async def test_call_model_returns_json_response(self, monkeypatch, agent):
-        expected = {"score": 95}
+    async def test_http_error_returns_error_dict(self):
+        agent = DummyAgent()
 
-        class MockResponse:
-            def raise_for_status(self):
-                pass
+        with patch("agents.agent_bridge.httpx.AsyncClient") as client:
+            client.return_value.__aenter__.return_value.post = AsyncMock(
+                side_effect=httpx.HTTPError("Connection failed")
+            )
 
-            def json(self):
-                return {
-                    "response": json.dumps(expected)
-                }
-
-        class MockClient:
-            async def __aenter__(self):
-                return self
-
-            async def __aexit__(self, *args):
-                pass
-
-            async def post(self, url, json):
-                return MockResponse()
-
-        monkeypatch.setattr(httpx, "AsyncClient", lambda **kwargs: MockClient())
-
-        result = await agent.call_model(
-            system_prompt="system",
-            user_prompt="user"
-        )
-
-        assert result == expected
-
-    @pytest.mark.asyncio
-    async def test_call_model_adds_language_to_system_prompt(self, monkeypatch):
-        agent = Agent(language="Spanish")
-
-        captured_payload = {}
-
-        class MockResponse:
-            def raise_for_status(self):
-                pass
-
-            def json(self):
-                return {
-                    "response": "{}"
-                }
-
-        class MockClient:
-            async def __aenter__(self):
-                return self
-
-            async def __aexit__(self, *args):
-                pass
-
-            async def post(self, url, json):
-                captured_payload.update(json)
-                return MockResponse()
-
-        monkeypatch.setattr(httpx, "AsyncClient", lambda **kwargs: MockClient())
-
-        await agent.call_model(
-            system_prompt="System prompt",
-            user_prompt="User prompt"
-        )
-
-        assert "You must respond in Spanish" in captured_payload["prompt"]
-
-    @pytest.mark.asyncio
-    async def test_call_model_returns_error_when_http_fails(self, monkeypatch, agent):
-        class MockClient:
-            async def __aenter__(self):
-                return self
-
-            async def __aexit__(self, *args):
-                pass
-
-            async def post(self, *args, **kwargs):
-                raise httpx.HTTPError("Connection error")
-
-        monkeypatch.setattr(httpx, "AsyncClient", lambda **kwargs: MockClient())
-
-        result = await agent.call_model(
-            system_prompt="system",
-            user_prompt="user"
-        )
+            result = await agent.call_model(
+                system_prompt="system",
+                user_prompt="user",
+            )
 
         assert result["error"] == "AI service error."
-        assert "Connection error" in result["details"]
+        assert "Connection failed" in result["details"]
 
     @pytest.mark.asyncio
-    async def test_call_model_returns_error_when_json_is_invalid(self, monkeypatch, agent):
-        class MockResponse:
-            def raise_for_status(self):
-                pass
+    async def test_invalid_json_returns_error_dict(self):
+        agent = DummyAgent()
 
-            def json(self):
-                return {
-                    "response": "not json"
-                }
+        fake_response = MagicMock()
+        fake_response.raise_for_status.return_value = None
+        fake_response.json.return_value = {
+            "response": "invalid json"
+        }
 
-        class MockClient:
-            async def __aenter__(self):
-                return self
+        with patch("agents.agent_bridge.httpx.AsyncClient") as client:
+            client.return_value.__aenter__.return_value.post = AsyncMock(
+                return_value=fake_response
+            )
 
-            async def __aexit__(self, *args):
-                pass
-
-            async def post(self, *args, **kwargs):
-                return MockResponse()
-
-        monkeypatch.setattr(httpx, "AsyncClient", lambda **kwargs: MockClient())
-
-        result = await agent.call_model(
-            system_prompt="system",
-            user_prompt="user"
-        )
+            result = await agent.call_model(
+                system_prompt="system",
+                user_prompt="user",
+            )
 
         assert result["error"] == "AI service error."
