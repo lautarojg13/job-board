@@ -1,8 +1,7 @@
-from applications.exceptions import ForbiddenApplicationStatusUpdate, TryingToApplyToOwnJob, ApplicationAlreadyExists, \
-    InvalidUpdateStatus, JobNotAvailable
+from applications.exceptions import ForbiddenApplicationStatusUpdate, TryingToApplyToOwnJob, ApplicationAlreadyExists, InvalidUpdateStatus, JobNotAvailable
 from applications.models import Application, ApplicationResponse, ApplicationStatus
 
-from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.exceptions import PermissionDenied
 
 from jobs.choices import JobPostStatus
 

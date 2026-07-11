@@ -5,11 +5,12 @@ from rest_framework.response import Response
 from rest_framework import status, generics
 
 from jobs.models import JobPost
-from .models import Application
-from .serializers import ApplicationDetailSerializer, ApplicationListSerializer, ApplicationStatusUpdateSerializer, ApplicationResponseSerializer, ApplicationCreateSerializer
-from .services import respond_to_application_service, withdraw_application_service
-from .permissions import IsJobOwner, CanAccessApplication
-from .filters import ApplicationFilter
+
+from applications.models import Application
+from applications.serializers import ApplicationDetailSerializer, ApplicationListSerializer, ApplicationStatusUpdateSerializer, ApplicationResponseSerializer, ApplicationCreateSerializer
+from applications.services import apply_to_job_service, respond_to_application_service, withdraw_application_service
+from applications.permissions import IsJobOwner, CanAccessApplication
+from applications.filters import ApplicationFilter
 
 
 # Create your views here.
@@ -27,6 +28,14 @@ class ApplyToJobView(generics.CreateAPIView):
         context["user"] = self.request.user
         context["job"] = self.get_job()
         return context
+
+    def perform_create(self, serializer):
+        apply_to_job_service(
+            user=self.request.user,
+            job=self.get_job(),
+            **serializer.validated_data
+        )
+
 
 class ApplicationDetailView(generics.RetrieveAPIView):
     serializer_class = ApplicationDetailSerializer

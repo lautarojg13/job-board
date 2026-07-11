@@ -40,13 +40,6 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
 
         return attrs
 
-    def create(self, validated_data):
-        return apply_to_job_service(
-            user=self.context["request"].user,
-            job=self.context["job"],
-            **validated_data
-        )
-
 class ApplicationListSerializer(_ApplicationBaseSerializer):
     job_id = serializers.IntegerField(source="job.id", read_only=True)
     
