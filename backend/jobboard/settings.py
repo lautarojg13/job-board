@@ -29,8 +29,8 @@ INSTALLED_APPS = [
     'companies',
     'jobs',
     'users',
+    'agents',
 
-    'core',
     'django_filters',
     'django_celery_results',
     
@@ -186,3 +186,12 @@ CELERY_RESULT_EXPIRES = 3600
 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = getattr(config, "EMAIL_HOST")
+EMAIL_PORT = getattr(config, "EMAIL_PORT")
+EMAIL_USE_TLS = getattr(config, "EMAIL_USE_TLS")
+EMAIL_HOST_USER = getattr(config, "EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = getattr(config, "EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = getattr(config, "DEFAULT_FROM_EMAIL")
