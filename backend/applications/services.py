@@ -1,10 +1,11 @@
-from applications.exceptions import ForbiddenApplicationStatusUpdate, TryingToApplyToOwnJob, ApplicationAlreadyExists, \
-    InvalidUpdateStatus, JobNotAvailable
+from applications.exceptions import ForbiddenApplicationStatusUpdate, TryingToApplyToOwnJob, ApplicationAlreadyExists, InvalidUpdateStatus, JobNotAvailable
 from applications.models import Application, ApplicationResponse, ApplicationStatus
 
-from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.exceptions import PermissionDenied
 
 from jobs.choices import JobPostStatus
+
+from core.emails import send_email_task
 
 def apply_to_job_service(user, job, **application_data):
 
@@ -16,19 +17,20 @@ def apply_to_job_service(user, job, **application_data):
 
     if job.status != JobPostStatus.ACTIVE:
         raise JobNotAvailable("You cannot apply to a job that is not active")
-
+    
+    send_email_task.delay(
+        subject="Application Confirmation",
+        message=f"You have successfully applied to: {job.title}",
+        recipient_list=[user.email],
+    )
+    
     return Application.objects.create(
         applicant=user,
         job=job,
         **application_data
     )
 
-def respond_to_application_service(
-    application,
-    responder,
-    status,
-    message=None
-):
+def respond_to_application_service(application, responder, status, message=None):
     if application.job.posted_by != responder:
         raise ForbiddenApplicationStatusUpdate()
 

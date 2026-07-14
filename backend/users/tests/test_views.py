@@ -70,52 +70,56 @@ REGISTRATION_TEST_CASES = [
     ),
 ]
 
-@pytest.mark.django_db
-@pytest.mark.parametrize("case_data,expected_status_code", REGISTRATION_TEST_CASES)
-def test_register_user(case_data, expected_status_code, existing_test_user):
-    client = APIClient()
-    
-    response = client.post(reverse("register_user"), data=case_data)
+class TestRegisterUser:
 
-    assert response.status_code == expected_status_code, \
-        f"Expected status {expected_status_code}, got {response.status_code}. Response: {response.data}"
+    @pytest.mark.django_db
+    @pytest.mark.parametrize("case_data,expected_status_code", REGISTRATION_TEST_CASES)
+    def test_register_user(self, case_data, expected_status_code, existing_test_user):
+        client = APIClient()
+        
+        response = client.post(reverse("register_user"), data=case_data)
 
-    if response.status_code == 201:
-        assert "message" in response.data
-        assert "user" in response.data
-        assert "tokens" in response.data
+        assert response.status_code == expected_status_code, \
+            f"Expected status {expected_status_code}, got {response.status_code}. Response: {response.data}"
 
-        user = response.data["user"]
+        if response.status_code == 201:
+            assert "message" in response.data
+            assert "user" in response.data
+            assert "tokens" in response.data
+
+            user = response.data["user"]
+            
+            assert user["username"] == case_data["username"]
+            assert user["email"] == case_data["email"]
+            assert user["first_name"] == case_data["first_name"]
+            assert user["last_name"] == case_data["last_name"]
+            
+            assert CustomUser.objects.filter(
+                username=user["username"], 
+                email=user["email"]
+            ).exists()
+        else:
+            assert not CustomUser.objects.filter(
+                username=case_data.get("username"),
+                email=case_data.get("email")
+            ).exists()
+
+class TestDuplicatedEmail:
+
+    @pytest.mark.django_db
+    def test_duplicated_email(self):
+        client = APIClient()
+        data = {
+            "username": "user1",
+            "email": "repetido@mail.com",
+            "password": "password123",
+            "password2": "password123"
+        }
         
-        assert user["username"] == case_data["username"]
-        assert user["email"] == case_data["email"]
-        assert user["first_name"] == case_data["first_name"]
-        assert user["last_name"] == case_data["last_name"]
+        client.post(reverse("register_user"), data=data)
         
-        assert CustomUser.objects.filter(
-            username=user["username"], 
-            email=user["email"]
-        ).exists()
-    else:
-        assert not CustomUser.objects.filter(
-            username=case_data.get("username"),
-            email=case_data.get("email")
-        ).exists()
+        data["username"] = "user2"
+        response = client.post(reverse("register_user"), data=data)
         
-@pytest.mark.django_db
-def test_duplicated_email():
-    client = APIClient()
-    data = {
-        "username": "user1",
-        "email": "repetido@mail.com",
-        "password": "password123",
-        "password2": "password123"
-    }
-    
-    client.post(reverse("register_user"), data=data)
-    
-    data["username"] = "user2"
-    response = client.post(reverse("register_user"), data=data)
-    
-    assert response.status_code == 400
-    assert "email" in response.data
+        assert response.status_code == 400
+        assert "email" in response.data
