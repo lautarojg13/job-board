@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.decorators import APIView
 
-from agent.serializers.input_serializers import ResumeAnalysisSerializer, JobSearchInputSerializer
+from agents.serializers.input_serializers import ResumeAnalysisSerializer, JobSearchInputSerializer
 
 from jobs.serializers import JobPostCreateSerializer, JobPostSerializer, JobPostListSerializer
 from jobs.permissions import IsJobOwner

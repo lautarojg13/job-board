@@ -2,7 +2,7 @@ import pytest
 
 from jobs.serializers import JobPostCreateSerializer, JobPostListSerializer
 
-from tests.conftest import CustomUserFactory
+from users.factories import CustomUserFactory
 from jobs.factories import JobPostFactory
 
 

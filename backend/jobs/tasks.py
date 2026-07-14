@@ -1,11 +1,11 @@
 from celery import shared_task
 
-from backend.jobs.utils.info import get_job_post_info
+from jobs.utils.info import get_job_post_info
 from jobs.services import get_jobs_by_agent_service
 
 from asgiref.sync import async_to_sync
 
-from agent.assistants import JobAssistantAgent
+from agents.assistants import JobAssistantAgent
 
 @shared_task
 def process_ai_search_task(user_prompt):
