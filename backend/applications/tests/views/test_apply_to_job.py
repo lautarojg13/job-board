@@ -50,7 +50,7 @@ def test_apply_twice_to_same_job(user_2, job, valid_pdf):
 
     response2 = client.post(url, data, format="multipart")
     assert response2.status_code == 400
-    print(response2.data)
+
     assert response2.data["detail"] == "You already applied this job"
 
 @pytest.mark.django_db
