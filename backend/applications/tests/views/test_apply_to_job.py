@@ -64,7 +64,7 @@ class TestApplyToJob:
         
         client = APIClient()
         client.force_authenticate(user=user_2)
-        url = reverse("apply_to_job", kwargs={"job_id": 432})
+        url = reverse("apply_to_job", kwargs={"job_id": 9999})
 
         response = client.post(url, {"cover_letter": "Invalid job"}, format="json")
         
