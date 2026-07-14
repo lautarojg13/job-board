@@ -1,57 +1,59 @@
 from django.core.management.base import BaseCommand
-from django.db import transaction
-
-from users.choices import UserRoleChoices
-from users.factories import CustomUserFactory
-
-from users.models import CustomUser
-
-
-SEED_USERNAME_PREFIX = "user_"
-
-
-def get_next_seed_username_index():
-    max_index = -1
-
-    for username in CustomUser.objects.filter(username__startswith=SEED_USERNAME_PREFIX).values_list("username", flat=True):
-        suffix = username[len(SEED_USERNAME_PREFIX):]
-
-        if suffix.isdigit():
-            max_index = max(max_index, int(suffix))
-
-    return max_index + 1
-
-
-def build_seed_user(username, role):
-    return CustomUserFactory.build(
-        username=username,
-        email=f"{username}@test.com",
-        role=role,
-    )
+from django.core.management import call_command
 
 
 class Command(BaseCommand):
-    
+
     def add_arguments(self, parser):
-        parser.add_argument("--total", default=10, type=int, help="Number of users will be created")
-    
+        parser.add_argument(
+            "--total",
+            default=10,
+            type=int,
+            help="Total number of users that will be created",
+        )
+        parser.add_argument(
+            "--admins",
+            default=None,
+            type=int,
+            help="Number of admin users to create (overrides ratio)",
+        )
+        parser.add_argument(
+            "--common-users",
+            default=None,
+            type=int,
+            help="Number of common users to create (overrides ratio)",
+        )
+
     def handle(self, *args, **options):
         total = options["total"]
+        admins_total = options["admins"]
+        common_users_total = options["common_users"]
 
         if total <= 0:
             self.stdout.write("0 Users created successfully")
             return
 
-        next_index = get_next_seed_username_index()
-        admin_total = min(total, max(1, total // 10))
+        if admins_total is None and common_users_total is None:
+            admins_total = min(total, max(1, total // 10))
+            common_users_total = total - admins_total
+        elif admins_total is None:
+            common_users_total = max(0, common_users_total)
+            admins_total = max(0, total - common_users_total)
+        elif common_users_total is None:
+            admins_total = max(0, admins_total)
+            common_users_total = max(0, total - admins_total)
+        else:
+            admins_total = max(0, admins_total)
+            common_users_total = max(0, common_users_total)
 
-        users = []
-        for index in range(total):
-            username = f"{SEED_USERNAME_PREFIX}{next_index + index}"
-            role = UserRoleChoices.ADMIN if index < admin_total else UserRoleChoices.USER
-            users.append(build_seed_user(username, role))
+        created_total = 0
 
-        with transaction.atomic():
-            CustomUser.objects.bulk_create(users)
+        if admins_total > 0:
+            call_command("seed_admins", total=admins_total)
+            created_total += admins_total
 
-        self.stdout.write(f"{total} Users created successfully")
+        if common_users_total > 0:
+            call_command("seed_common_users", total=common_users_total)
+            created_total += common_users_total
+
+        self.stdout.write(f"{created_total} Users created successfully")
