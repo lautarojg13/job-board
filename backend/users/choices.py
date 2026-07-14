@@ -1,6 +1,5 @@
 from django.db import models
 
 class UserRoleChoices(models.TextChoices):
-    DEVELOPER = 'DEVELOPER', 'Developer'
-    RECRUITER = 'RECRUITER', 'Recruiter / Company'
+    USER = 'USER', 'User'
     ADMIN = 'ADMIN', 'System admin'

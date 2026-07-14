@@ -5,7 +5,6 @@ from django.contrib.auth.hashers import make_password
 from users.choices import UserRoleChoices
 from users.models import CustomUser
 
-import random
 import factory
 
 class CustomUserFactory(DjangoModelFactory):
@@ -24,7 +23,5 @@ class CustomUserFactory(DjangoModelFactory):
     
     first_name = factory.Faker('first_name')
     last_name = factory.Faker('last_name')
-    role = factory.LazyFunction(
-        lambda: random.choice(UserRoleChoices.values)
-    )
+    role = UserRoleChoices.USER
     is_active = True
