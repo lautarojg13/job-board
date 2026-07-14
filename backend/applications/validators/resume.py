@@ -39,10 +39,12 @@ def validate_pdf_mime(file):
 
 
 def validate_pdf_signature(file):
-    signature = file.read(4)
+    initial_pos = file.tell()
 
     file.seek(0)
-
+    signature = file.read(4)
+    file.seek(initial_pos)
+    
     if signature != PDF_SIGNATURE:
         raise ValidationError(
             "Corrupted or invalid PDF file."
