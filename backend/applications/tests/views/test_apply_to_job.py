@@ -37,8 +37,8 @@ class TestApplyToJob:
         assert response.status_code == 401
 
     @pytest.mark.django_db
-    def test_apply_twice_to_same_job(self, user_2, job, valid_pdf):
-        
+    @patch("core.emails.send_email_task.delay")
+    def test_apply_twice_to_same_job(self, mock_delay, user_2, job, valid_pdf):
         client = APIClient()
         client.force_authenticate(user=user_2)
         url = reverse("apply_to_job", kwargs={"job_id": job.id})
@@ -57,6 +57,7 @@ class TestApplyToJob:
         assert response2.status_code == 400
 
         assert response2.data["detail"] == "You already applied this job"
+        mock_delay.assert_called_once()
 
     @pytest.mark.django_db
     def test_apply_to_nonexistent_job(self, user_2):
