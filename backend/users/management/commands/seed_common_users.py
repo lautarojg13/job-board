@@ -9,7 +9,6 @@ class Command(BaseSeedCommand):
     def handle_create_common_users(self, total):
         self.create_users_with_role(total, UserRoleChoices.USER, "common users")
         
-
     def handle(self, *args, **options):
         total = options["total"]
         self.handle_create_common_users(total)
