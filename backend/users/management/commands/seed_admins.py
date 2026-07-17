@@ -13,7 +13,7 @@ class Command(BaseSeedCommand):
 		)
 
 	def handle_create_admins(self, total):
-		self.create_users_with_role(total, UserRoleChoices.ADMIN, "admin users")
+		self.seed_workflow(total, UserRoleChoices.ADMIN, "admin users")
 
 	def handle(self, *args, **options):
 		total = options["total"]
