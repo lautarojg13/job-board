@@ -6,11 +6,11 @@ from rest_framework.exceptions import PermissionDenied
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import CustomUser
-from .serializers import LoginUserSerializer, CustomUserRegistrationSerializer, LogoutSerializer, UserProfileInfoSerializer, UpdateUserPasswordSerializer
+from users.serializers import LoginUserSerializer, CustomUserRegistrationSerializer, LogoutSerializer, UserProfileInfoSerializer, UpdateUserPasswordSerializer
 
 # Create your views here.
 
+#DEPRECATED
 class LoginAPIView(APIView):
     permission_classes = [AllowAny]
     serializer_class = LoginUserSerializer
@@ -22,6 +22,7 @@ class LoginAPIView(APIView):
         
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
+#DEPRECATED
 class RegisterUserView(generics.CreateAPIView):
     serializer_class = CustomUserRegistrationSerializer
     permission_classes = [AllowAny]
@@ -43,6 +44,7 @@ class RegisterUserView(generics.CreateAPIView):
             }
         }, status=status.HTTP_201_CREATED)
 
+#DEPRECATED
 class LogoutAPIView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = LogoutSerializer
@@ -63,7 +65,8 @@ class UserProfileRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     
     def get_object(self):
         return self.request.user
-    
+
+#DEPRECATED
 class UpdateUserPasswordView(APIView):
     permission_classes = [IsAuthenticated]
     
