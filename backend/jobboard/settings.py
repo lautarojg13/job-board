@@ -23,10 +23,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    'allauth',
-    'allauth.account',
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
 
     'rest_framework',
+    'rest_framework.authtoken',
     
     'applications',
     'companies',
@@ -182,6 +187,10 @@ SIMPLE_JWT = {
     "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
+}
+
+REST_AUTH = {
+    "REGISTER_SERIALIZER":"users.serializers.CustomUserRegistrationSerializer"
 }
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
