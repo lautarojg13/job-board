@@ -190,7 +190,8 @@ SIMPLE_JWT = {
 }
 
 REST_AUTH = {
-    "REGISTER_SERIALIZER":"users.serializers.CustomUserRegistrationSerializer"
+    "REGISTER_SERIALIZER":"users.serializers.CustomUserRegistrationSerializer",
+    "USER_DETAILS_SERIALIZER": "users.serializers.CustomUserDetailsSerializer",
 }
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0'

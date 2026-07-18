@@ -1,12 +1,6 @@
-from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
-
-from rest_framework_simplejwt.tokens import RefreshToken, TokenError
-
-from django.contrib.auth.password_validation import validate_password
-
 from allauth.account.adapter import get_adapter
 from dj_rest_auth.registration.serializers import RegisterSerializer
+from dj_rest_auth.serializers import UserDetailsSerializer
 
 from users.models import CustomUser
 
@@ -34,64 +28,55 @@ class CustomUserRegistrationSerializer(RegisterSerializer):
         
         return user
     
-class UserProfileInfoSerializer(serializers.ModelSerializer):
-    class Meta:
+
+class CustomUserDetailsSerializer(UserDetailsSerializer):
+
+    class Meta(UserDetailsSerializer.Meta):
         model = CustomUser
-        fields = [
+        fields = (
             "id",
             "username",
             "email",
             "first_name",
             "last_name",
-            "role"
-        ]
-        read_only_fields = ["email"]
-    
-class LogoutSerializer(serializers.Serializer):
-    refresh = serializers.CharField()
+            "role",
+        )
+        read_only_fields = ("email","role")
+  
 
-    def validate(self, attrs):
-        self.token = attrs['refresh']
-        return attrs
-
-    def save(self, **kwargs):
-        try:
-            RefreshToken(self.token).blacklist()
-        except TokenError:
-            raise serializers.ValidationError({'refresh': 'Invalid or expired token'})
-        
-class UpdateUserPasswordSerializer(serializers.Serializer):
-    old_password = serializers.CharField(write_only=True)
-    new_password = serializers.CharField(write_only=True, min_length=8)
-    new_password2 = serializers.CharField(write_only=True, min_length=8)
+# DEPRECATED 
+# class UpdateUserPasswordSerializer(serializers.Serializer):
+#     old_password = serializers.CharField(write_only=True)
+#     new_password = serializers.CharField(write_only=True, min_length=8)
+#     new_password2 = serializers.CharField(write_only=True, min_length=8)
     
-    def validate_old_password(self, value):
-        user = self.context["user"]
+#     def validate_old_password(self, value):
+#         user = self.context["user"]
         
-        if not user.check_password(value):
-            raise ValidationError("Provided password is not correct.")
+#         if not user.check_password(value):
+#             raise ValidationError("Provided password is not correct.")
         
-        return value
+#         return value
     
-    def validate(self, data):
-        new_password = data.get("new_password")
-        new_password2 = data.get("new_password2")
+#     def validate(self, data):
+#         new_password = data.get("new_password")
+#         new_password2 = data.get("new_password2")
         
-        if new_password != new_password2:
-            raise ValidationError("Provided new passwords don't match.")
+#         if new_password != new_password2:
+#             raise ValidationError("Provided new passwords don't match.")
         
-        validate_password(new_password, user=self.context["user"])
+#         validate_password(new_password, user=self.context["user"])
         
-        return data
+#         return data
     
-    def save(self):
+#     def save(self):
         
-        user = self.context["user"]
+#         user = self.context["user"]
         
-        user.set_password(self.validated_data["new_password"])
-        user.save()
+#         user.set_password(self.validated_data["new_password"])
+#         user.save()
         
-        return user
+#         return user
     
     
     
@@ -124,3 +109,18 @@ class UpdateUserPasswordSerializer(serializers.Serializer):
 #             'access_expires': int(refresh.access_token.lifetime.total_seconds()),
 #             'refresh_expires': int(refresh.lifetime.total_seconds())
 #         }
+
+
+# DEPRECATED  
+# class LogoutSerializer(serializers.Serializer):
+#     refresh = serializers.CharField()
+
+#     def validate(self, attrs):
+#         self.token = attrs['refresh']
+#         return attrs
+
+#     def save(self, **kwargs):
+#         try:
+#             RefreshToken(self.token).blacklist()
+#         except TokenError:
+#             raise serializers.ValidationError({'refresh': 'Invalid or expired token'})
