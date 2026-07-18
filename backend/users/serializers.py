@@ -3,70 +3,35 @@ from rest_framework.exceptions import ValidationError
 
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
-from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
+
+from allauth.account.adapter import get_adapter
+from dj_rest_auth.registration.serializers import RegisterSerializer
 
 from users.models import CustomUser
 
-class LoginUserSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
+class CustomUserRegistrationSerializer(RegisterSerializer):
     
-    def validate(self, attrs):
-        username = attrs.get('username')
-        password = attrs.get('password')
-
-        if username and password:
-            user = authenticate(username=username, password=password)
-            if not user:
-                raise serializers.ValidationError('Invalid credentials.')
-            
-            if not user.is_active:
-                raise serializers.ValidationError('User is disabled.')
-        else:
-            raise serializers.ValidationError('Must include "username" and "password".')
-
-        refresh = RefreshToken.for_user(user)
+    def get_cleaned_data(self):
+        data = super().get_cleaned_data()
         
-        return {
-            'user': UserProfileInfoSerializer(user).data,
-            'access': str(refresh.access_token),
-            'refresh': str(refresh),
-            'access_expires': int(refresh.access_token.lifetime.total_seconds()),
-            'refresh_expires': int(refresh.lifetime.total_seconds())
-        }
-
-
-class CustomUserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8, required=True)
-    password2 = serializers.CharField(write_only=True, min_length=8, required=True)
-    
-    class Meta:
-        model = CustomUser
-        fields = ['username', 'email', 'password', 'first_name', 'last_name', 'role', 'password', 'password2']
-        
-    def validate_email(self, value):
-        if CustomUser.objects.filter(email=value).exists():
-            raise ValidationError(f"{value} is already in use.")
-        
-        return value
-    
-    def validate(self, data):
-        password = data.get("password")
-        password2 = data.get("password2")
-        
-        if password != password2:
-            raise ValidationError("Provided password don't match")
+        data.update({
+            'username':self.validated_data.get("username", ""),
+            'email':self.validated_data.get("email", ""),
+            'first_name':self.validated_data.get("first_name", ""),
+            'last_name':self.validated_data.get("last_name", ""),
+            'role':self.validated_data.get("role", "")
+        })
         
         return data
-
-    def create(self, validated_data):
-        password = validated_data.pop('password')
-        validated_data.pop('password2')
+    
+    def save(self, request):
+        adapter = get_adapter()
+        user = adapter.new_user(request)
+        self.cleaned_data = self.get_cleaned_data()
         
-        user = CustomUser(**validated_data)
-        user.set_password(password)
-        user.save()
+        user = adapter.save_user(request, user, self, commit=True)
+        
         return user
     
 class UserProfileInfoSerializer(serializers.ModelSerializer):
@@ -127,3 +92,35 @@ class UpdateUserPasswordSerializer(serializers.Serializer):
         user.save()
         
         return user
+    
+    
+    
+    
+# DEPRECATED
+# class LoginUserSerializer(serializers.Serializer):
+#     username = serializers.CharField()
+#     password = serializers.CharField(write_only=True)
+    
+#     def validate(self, attrs):
+#         username = attrs.get('username')
+#         password = attrs.get('password')
+
+#         if username and password:
+#             user = authenticate(username=username, password=password)
+#             if not user:
+#                 raise serializers.ValidationError('Invalid credentials.')
+            
+#             if not user.is_active:
+#                 raise serializers.ValidationError('User is disabled.')
+#         else:
+#             raise serializers.ValidationError('Must include "username" and "password".')
+
+#         refresh = RefreshToken.for_user(user)
+        
+#         return {
+#             'user': UserProfileInfoSerializer(user).data,
+#             'access': str(refresh.access_token),
+#             'refresh': str(refresh),
+#             'access_expires': int(refresh.access_token.lifetime.total_seconds()),
+#             'refresh_expires': int(refresh.lifetime.total_seconds())
+#         }
