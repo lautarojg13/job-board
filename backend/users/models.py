@@ -8,4 +8,4 @@ from users.choices import UserRoleChoices
 class CustomUser(AbstractUser):
     
     email = models.EmailField(unique=True, blank=False, null=False)
-    role = models.CharField(max_length=20, choices=UserRoleChoices.choices, default=UserRoleChoices.CANDIDATE)
+    role = models.CharField(max_length=20, choices=UserRoleChoices.choices, default=UserRoleChoices.USER)
