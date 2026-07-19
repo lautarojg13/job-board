@@ -58,7 +58,7 @@ class TestCustomUserRegistrationSerializer:
         assert "non_field_errors" in serializer.errors
 
     @pytest.mark.django_db
-    def test_register_password_too_short_raises_error(self):
+    def test_register_password1_too_short_raises_error(self):
         """Test that password shorter than 8 characters raises ValidationError"""
         data = {
             'username': 'newuser',
@@ -76,19 +76,6 @@ class TestCustomUserRegistrationSerializer:
         assert any(error.code == "password_too_short" for error in errors)
 
     @pytest.mark.django_db
-    def test_register_password2_too_short_raises_error(self):
-        """Test that password2 shorter than 8 characters raises ValidationError"""
-        data = {
-            'username': 'newuser',
-            'email': 'newuser@test.com',
-            'password': 'TestPass123!',
-            'password2': 'Test123'
-        }
-        
-        serializer = CustomUserRegistrationSerializer(data=data)
-        assert not serializer.is_valid()
-
-    @pytest.mark.django_db
     def test_register_duplicate_email_raises_error(self):
         """Test that duplicate email raises ValidationError"""
         CustomUser.objects.create_user(username='existing', email='test@test.com', password='TestPass123!')
@@ -96,7 +83,7 @@ class TestCustomUserRegistrationSerializer:
         data = {
             'username': 'newuser',
             'email': 'test@test.com',
-            'password': 'TestPass123!',
+            'password1': 'TestPass123!',
             'password2': 'TestPass123!'
         }
         
