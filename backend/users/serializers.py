@@ -22,7 +22,6 @@ class CustomUserRegistrationSerializer(RegisterSerializer):
             'email':self.validated_data.get("email", ""),
             'first_name':self.validated_data.get("first_name", ""),
             'last_name':self.validated_data.get("last_name", ""),
-            'role':self.validated_data.get("role", "")
         })
         
         return data
