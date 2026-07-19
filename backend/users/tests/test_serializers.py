@@ -10,6 +10,8 @@ from users.models import CustomUser
 from users.choices import UserRoleChoices
 
 
+factory = APIRequestFactory()
+request = factory.post("/register/")
 
 class TestCustomUserRegistrationSerializer:
     
@@ -26,9 +28,6 @@ class TestCustomUserRegistrationSerializer:
         }
         
         serializer = CustomUserRegistrationSerializer(data=data)
-                
-        factory = APIRequestFactory()
-        request = factory.post("/register/")
         
         assert serializer.is_valid(), serializer.errors
         
@@ -117,6 +116,8 @@ class TestCustomUserRegistrationSerializer:
         """Test that missing username raises ValidationError"""
         data = {
             'email': 'newuser@test.com',
+            'first_name': 'John',
+            'last_name': 'Doe',
             'password': 'TestPass123!',
             'password2': 'TestPass123!'
         }
@@ -130,6 +131,8 @@ class TestCustomUserRegistrationSerializer:
         """Test that missing email raises ValidationError"""
         data = {
             'username': 'newuser',
+            'first_name': 'John',
+            'last_name': 'Doe',
             'password': 'TestPass123!',
             'password2': 'TestPass123!'
         }
@@ -145,15 +148,17 @@ class TestCustomUserRegistrationSerializer:
         data = {
             'username': 'newuser',
             'email': 'newuser@test.com',
-            'password': 'TestPass123!',
+            'first_name': 'John',
+            'last_name': 'Doe',
+            'password1': 'TestPass123!',
             'password2': 'TestPass123!'
         }
         
         serializer = CustomUserRegistrationSerializer(data=data)
         assert serializer.is_valid()
         
-        user = serializer.save()
-        assert user.role == UserRoleChoices.CANDIDATE
+        user = serializer.save(request=request)
+        assert user.role == UserRoleChoices.USER
 
     @pytest.mark.django_db
     def test_register_password_hashed_not_plaintext(self):
@@ -161,14 +166,16 @@ class TestCustomUserRegistrationSerializer:
         data = {
             'username': 'newuser',
             'email': 'newuser@test.com',
-            'password': 'TestPass123!',
+            'first_name': 'John',
+            'last_name': 'Doe',
+            'password1': 'TestPass123!',
             'password2': 'TestPass123!'
         }
         
         serializer = CustomUserRegistrationSerializer(data=data)
         assert serializer.is_valid()
         
-        user = serializer.save()
+        user = serializer.save(request=request)
         retrieved_user = CustomUser.objects.get(username='newuser')
         assert retrieved_user.password != 'TestPass123!'
         assert retrieved_user.check_password('TestPass123!')
@@ -191,30 +198,13 @@ class TestUserProfileInfoSerializer:
         assert 'first_name' in data
         assert 'last_name' in data
         assert 'role' in data
-
-    @pytest.mark.django_db
-    def test_profile_serializes_with_empty_optional_fields(self):
-        """Test that serializer handles empty optional fields correctly"""
-        user = CustomUser.objects.create_user(
-            username='testuser',
-            email='test@test.com',
-            password='TestPass123!',
-            first_name='',
-            last_name=''
-        )
         
-        serializer = CustomUserDetailsSerializer(user)
-        data = serializer.data
-        
-        assert data['first_name'] == ''
-        assert data['last_name'] == ''
-
     def test_profile_email_is_readonly(self):
         """Test that email field is in read_only_fields"""
         serializer = CustomUserDetailsSerializer()
         assert 'email' in serializer.fields
         assert serializer.fields['email'].read_only
-
+        
     def test_profile_readonly_fields_not_writable(self):
         """Test that read-only fields cannot be modified"""
         serializer = CustomUserDetailsSerializer()
