@@ -25,6 +25,8 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         user = super().save_user(request, user, form, commit)
         
         user.role = UserRoleChoices.USER
+        user.first_name = form.cleaned_data["first_name"]
+        user.last_name = form.cleaned_data["last_name"]
         
         if commit:
             user.save()
