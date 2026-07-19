@@ -1,6 +1,8 @@
 from allauth.account.adapter import get_adapter
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from dj_rest_auth.serializers import UserDetailsSerializer
+from allauth.account.utils import filter_users_by_email
+
 
 from rest_framework import serializers
 
@@ -9,6 +11,14 @@ from users.models import CustomUser
 class CustomUserRegistrationSerializer(RegisterSerializer):
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
+    
+    def validate_email(self, email):
+        if filter_users_by_email(email):
+            raise serializers.ValidationError(
+                "A user is already registered with this e-mail address."
+            )
+
+        return email
     
     def get_cleaned_data(self):
         data = super().get_cleaned_data()

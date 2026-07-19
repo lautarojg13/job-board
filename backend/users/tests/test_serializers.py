@@ -83,12 +83,15 @@ class TestCustomUserRegistrationSerializer:
         data = {
             'username': 'newuser',
             'email': 'test@test.com',
+            'first_name': 'John',
+            'last_name': 'Doe',
             'password1': 'TestPass123!',
             'password2': 'TestPass123!'
         }
         
         serializer = CustomUserRegistrationSerializer(data=data)
         assert not serializer.is_valid()
+        print(serializer.errors)
         assert 'email' in serializer.errors
 
     @pytest.mark.django_db
