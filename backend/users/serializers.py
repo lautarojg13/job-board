@@ -2,9 +2,17 @@ from allauth.account.adapter import get_adapter
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from dj_rest_auth.serializers import UserDetailsSerializer
 
+from rest_framework import serializers
+
 from users.models import CustomUser
+from users.choices import UserRoleChoices
 
 class CustomUserRegistrationSerializer(RegisterSerializer):
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
+    role = serializers.ChoiceField(
+        choices=UserRoleChoices.choices
+    )
     
     def get_cleaned_data(self):
         data = super().get_cleaned_data()
