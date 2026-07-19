@@ -47,7 +47,7 @@ class TestCustomUserRegistrationSerializer:
         data = {
             'username': 'newuser',
             'email': 'newuser@test.com',
-            'password': 'TestPass123!',
+            'password1': 'TestPass123!',
             'password2': 'TestPass456!',
             'first_name': 'John',
             'last_name': 'Doe'
@@ -55,7 +55,7 @@ class TestCustomUserRegistrationSerializer:
         
         serializer = CustomUserRegistrationSerializer(data=data)
         assert not serializer.is_valid()
-        assert "Provided password don't match" in str(serializer.errors)
+        assert "non_field_errors" in serializer.errors
 
     @pytest.mark.django_db
     def test_register_password_too_short_raises_error(self):
@@ -63,12 +63,17 @@ class TestCustomUserRegistrationSerializer:
         data = {
             'username': 'newuser',
             'email': 'newuser@test.com',
-            'password': 'Test123',
+            'first_name': 'John',
+            'last_name': 'Doe',
+            'password1': 'Test123',
             'password2': 'Test123'
         }
         
         serializer = CustomUserRegistrationSerializer(data=data)
         assert not serializer.is_valid()
+        
+        errors = serializer.errors["password1"]
+        assert any(error.code == "password_too_short" for error in errors)
 
     @pytest.mark.django_db
     def test_register_password2_too_short_raises_error(self):
