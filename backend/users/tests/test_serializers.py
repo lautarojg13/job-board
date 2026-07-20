@@ -89,8 +89,8 @@ class TestCustomUserRegistrationSerializer:
         }
         
         serializer = CustomUserRegistrationSerializer(data=data)
+        
         assert not serializer.is_valid()
-        print(serializer.errors)
         assert 'email' in serializer.errors
 
     @pytest.mark.django_db
@@ -108,6 +108,7 @@ class TestCustomUserRegistrationSerializer:
         }
         
         serializer = CustomUserRegistrationSerializer(data=data)
+        
         assert not serializer.is_valid()
         assert "email" in serializer.errors
 
@@ -123,7 +124,8 @@ class TestCustomUserRegistrationSerializer:
         }
         
         serializer = CustomUserRegistrationSerializer(data=data)
-        serializer.is_valid()
+        
+        assert not serializer.is_valid()
         assert 'username' in serializer.errors
 
     @pytest.mark.django_db
@@ -138,8 +140,8 @@ class TestCustomUserRegistrationSerializer:
         }
         
         serializer = CustomUserRegistrationSerializer(data=data)
-        serializer.is_valid()
         
+        assert not serializer.is_valid()
         assert 'email' in serializer.errors
 
     @pytest.mark.django_db
