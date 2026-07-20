@@ -12,7 +12,9 @@ click-plugins==1.1.1.2
 click-repl==0.3.0
 colorama==0.4.6
 cryptography==48.0.0
+dj-rest-auth==7.2.0
 Django==5.2.6
+django-allauth==65.18.0
 django-filter==25.2
 django_celery_results==2.6.0
 djangorestframework==3.16.1
