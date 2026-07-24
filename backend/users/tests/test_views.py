@@ -111,7 +111,7 @@ class TestDuplicatedEmail:
         client = APIClient()
         data = {
             "username": "user1",
-            "email": "repetido@mail.com",
+            "email": "random_email@mail.com",
             "password1": "password123",
             "password2": "password123"
         }
