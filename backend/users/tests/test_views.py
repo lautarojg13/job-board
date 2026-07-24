@@ -107,13 +107,16 @@ class TestRegisterUser:
 class TestDuplicatedEmail:
 
     @pytest.mark.django_db
-    def test_duplicated_email(self):
+    @patch("users.adapter.send_email_task.delay")
+    def test_duplicated_email(self, mock_delay):
         client = APIClient()
         data = {
             "username": "user1",
             "email": "random_email@mail.com",
-            "password1": "password123",
-            "password2": "password123"
+            "first_name": "user fistname",
+            "last_name": "user lastname",
+            "password1": "random_password323",
+            "password2": "random_password323"
         }
         
         client.post("/auth/registration/", data=data)
@@ -123,3 +126,4 @@ class TestDuplicatedEmail:
         
         assert response.status_code == 400
         assert "email" in response.data
+        mock_delay.assert_called_once()
