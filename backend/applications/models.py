@@ -4,8 +4,8 @@ from applications.validators.resume import RESUME_VALIDATORS
 
 from users.models import CustomUser
 from jobs.models import JobPost
-from .querysets import ApplicationQuerySet
-from .choices import ApplicationStatus
+from applications.querysets import ApplicationQuerySet
+from applications.choices import ApplicationStatus
 
 
 

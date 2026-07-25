@@ -1,10 +1,10 @@
-import magic
+# import magic
 
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 
 from pypdf import PdfReader
-from pypdf.errors import PdfReadError
+# from pypdf.errors import PdfReadError
 
 MAX_RESUME_SIZE = 5 * 1024 * 1024  # 5 MB
 
@@ -26,16 +26,16 @@ def validate_file_extension(file, extension="pdf"):
     extension_validator(file)
 
 
-def validate_pdf_mime(file):
-    initial_pos = file.tell()
-    file.seek(0)
-    mime = magic.from_buffer(file.read(2048), mime=True)
-    file.seek(initial_pos)
+# def validate_pdf_mime(file):
+#     initial_pos = file.tell()
+#     file.seek(0)
+#     mime = magic.from_buffer(file.read(2048), mime=True)
+#     file.seek(initial_pos)
 
-    if mime not in ALLOWED_MIME_TYPES:
-        raise ValidationError(
-            "Invalid file type."
-        )
+#     if mime not in ALLOWED_MIME_TYPES:
+#         raise ValidationError(
+#             "Invalid file type."
+#         )
 
 
 def validate_pdf_signature(file):
@@ -75,7 +75,7 @@ def validate_pdf_integrity(file):
 RESUME_VALIDATORS = [
     validate_file_size,
     validate_file_extension,
-    validate_pdf_mime,
+    #validate_pdf_mime,
     validate_pdf_signature,
     validate_pdf_integrity
 ]

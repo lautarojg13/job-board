@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
-from .models import Application, ApplicationResponse, ApplicationStatus
-from .services import apply_to_job_service
+from applications.models import Application, ApplicationResponse, ApplicationStatus
 
 class _ApplicationBaseSerializer(serializers.ModelSerializer):
     class Meta:

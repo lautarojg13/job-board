@@ -2,6 +2,10 @@ from datetime import timedelta
 from pathlib import Path
 from decouple import config
 
+import pymysql
+
+pymysql.install_as_MySQLdb()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -194,9 +198,9 @@ REST_AUTH = {
     "USER_DETAILS_SERIALIZER": "users.serializers.CustomUserDetailsSerializer",
 }
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = config("CELERY_BROKER_URL")
 
-CELERY_RESULT_BACKEND = 'redis://redis:6379/1'
+CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND")
 CELERY_RESULT_EXPIRES = 3600
 
 CELERY_ACCEPT_CONTENT = ['json']
