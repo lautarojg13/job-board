@@ -9,7 +9,6 @@ from applications.validators.resume import (
     validate_file_extension,
     validate_file_size,
     validate_pdf_integrity,
-    validate_pdf_mime,
     validate_pdf_signature,
 )
 
@@ -79,32 +78,6 @@ class TestValidateFileExtension:
 
         with pytest.raises(ValidationError):
             validate_file_extension(file)
-
-
-class TestValidatePdfMime:
-
-    @pytest.mark.parametrize("mime_value", ["application/pdf"])
-    def test_pdf_mime_is_valid(self, mocker, mime_value):
-        file = build_uploaded_file("resume.pdf", b"dummy content")
-        file.seek(3)
-
-        mocker.patch("applications.validators.resume.magic.from_buffer", return_value=mime_value)
-
-        validate_pdf_mime(file)
-
-        assert file.tell() == 3
-
-    @pytest.mark.parametrize("mime_value", ["text/plain", "image/png"])
-    def test_non_pdf_mime_raises_validation_error(self, mocker, mime_value):
-        file = build_uploaded_file("resume.pdf", b"dummy content")
-        file.seek(5)
-
-        mocker.patch("applications.validators.resume.magic.from_buffer", return_value=mime_value)
-
-        with pytest.raises(ValidationError, match="Invalid file type."):
-            validate_pdf_mime(file)
-
-        assert file.tell() == 5
 
 
 class TestValidatePdfSignature:

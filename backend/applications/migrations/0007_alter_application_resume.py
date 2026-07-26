@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='application',
             name='resume',
-            field=models.FileField(upload_to='resumes/', validators=[applications.validators.resume.validate_file_size, applications.validators.resume.validate_file_extension, applications.validators.resume.validate_pdf_mime, applications.validators.resume.validate_pdf_signature, applications.validators.resume.validate_pdf_integrity]),
+            field=models.FileField(upload_to='resumes/', validators=[applications.validators.resume.validate_file_size, applications.validators.resume.validate_file_extension, applications.validators.resume.validate_pdf_signature, applications.validators.resume.validate_pdf_integrity]),
         ),
     ]

@@ -1,0 +1,3 @@
+GRANT ALL PRIVILEGES ON *.* TO 'jobboard_user'@'%';
+
+FLUSH PRIVILEGES;
