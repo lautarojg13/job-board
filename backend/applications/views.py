@@ -100,6 +100,11 @@ class UserApplicationsListView(generics.ListAPIView):
     filterset_class = ApplicationFilter
 
     def get_queryset(self):
+        
+        if getattr(self, "swagger_fake_view", False):
+            return Application.objects.none()
+    
+    
         return Application.objects.filter(applicant=self.request.user)
 
 class JobApplicationsListView(generics.ListAPIView):
@@ -108,5 +113,9 @@ class JobApplicationsListView(generics.ListAPIView):
     filterset_class = ApplicationFilter
 
     def get_queryset(self):
+        
+        if getattr(self, "swagger_fake_view", False):
+            return Application.objects.none()
+        
         job_id = self.kwargs["job_id"]
         return Application.objects.filter(job_id=job_id)

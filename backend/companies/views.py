@@ -42,6 +42,10 @@ class CompanyJobListView(generics.ListAPIView):
     serializer_class = JobPostListSerializer
     
     def get_queryset(self):
+        
+        if getattr(self, "swagger_fake_view", False):
+            return JobPost.objects.none()
+        
         company_id = self.kwargs.get("company_id")
         
         get_object_or_404(Company, id=company_id)

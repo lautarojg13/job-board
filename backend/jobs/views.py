@@ -1,7 +1,18 @@
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from drf_spectacular.utils import (
+    extend_schema,
+    inline_serializer,
+    OpenApiParameter,
+)
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, inline_serializer
+
+
+from rest_framework import serializers
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.decorators import APIView
+
 
 from agents.serializers.input_serializers import ResumeAnalysisSerializer, JobSearchInputSerializer
 
@@ -69,6 +80,10 @@ class GetOwnerJobPostListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        
+        if getattr(self, "swagger_fake_view", False):
+                    return JobPost.objects.none()
+        
         return JobPost.objects.filter(posted_by=self.request.user)
 
 class JobPostRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
@@ -97,6 +112,16 @@ class JobPostRetrieveView(generics.RetrieveAPIView):
 
 class TaskStatusView(APIView):
 
+    @extend_schema(
+        responses=inline_serializer(
+            name="TaskStatusResponse",
+            fields={
+                "task_id": serializers.CharField(),
+                "status": serializers.CharField(),
+                "result": serializers.JSONField(allow_null=True),
+            },
+        )
+    )
     def get(self, request, task_id, *args, **kwargs):
         task_result = AsyncResult(task_id)
         
