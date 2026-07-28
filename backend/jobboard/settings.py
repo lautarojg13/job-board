@@ -27,15 +27,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    "allauth",
-    "allauth.account",
-    "allauth.socialaccount",
-
-    "dj_rest_auth",
-    "dj_rest_auth.registration",
 
     'rest_framework',
     'rest_framework.authtoken',
+    'drf_spectacular',
+    
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
     
     'applications',
     'companies',
@@ -140,6 +142,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
@@ -148,6 +151,23 @@ REST_FRAMEWORK = {
             'rest_framework.filters.SearchFilter',
             'rest_framework.filters.OrderingFilter',
     ],
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Job Board API',
+    'DESCRIPTION': 'API RESTful job posts, applications managing and jobs AI search',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SECURITY': [{'BearerAuth': []}],
+    'SECURITY_DEFINITIONS': {
+        'BearerAuth': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization',
+            'description': 'Write your token using this format: Bearer <your_jwt>'
+        }
+    }
 }
 
 if not DEBUG:
