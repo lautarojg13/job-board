@@ -167,6 +167,11 @@ SPECTACULAR_SETTINGS = {
             'name': 'Authorization',
             'description': 'Write your token using this format: Bearer <your_jwt>'
         }
+    },
+    
+    'ENUM_NAME_OVERRIDES': {
+        'ApplicationStatusEnum': 'applications.choices.ApplicationStatus',
+        'JobPostStatusEnum': 'jobs.choices.JobPostStatus',
     }
 }
 
