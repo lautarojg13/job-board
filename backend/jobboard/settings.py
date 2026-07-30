@@ -155,7 +155,7 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Job Board API',
-    'DESCRIPTION': 'API RESTful job posts, applications managing and jobs AI search',
+    'DESCRIPTION': 'API RESTful with job postings, applications, AI job matching, company management, and authentication.',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,

@@ -23,7 +23,7 @@ services:
     ports:
       - "6379:6379"
 
-  web:
+  backend:
     build: 
       context: ./backend
       dockerfile: Dockerfile
@@ -58,14 +58,14 @@ services:
       redis:
         condition: service_started
 
-  # frontend:
-  #   build: ./frontend
-  #   container_name: react_frontend
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - ./frontend:/app
-  #     - /app/node_modules
+  frontend:
+    build: ./frontend
+    container_name: react_frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 
 volumes:
   mysql_data:
