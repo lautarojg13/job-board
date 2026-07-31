@@ -1,0 +1,6 @@
+{
+  "name": "Job Board",
+  "description": "Frontend for Django REST Framework Job Board API with job postings, applications, AI job matching, company management, and authentication.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
