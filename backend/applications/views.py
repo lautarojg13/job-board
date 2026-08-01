@@ -76,14 +76,14 @@ class RespondToApplicationView(generics.UpdateAPIView):
             status=status.HTTP_200_OK
         )
     
-class WithdrawApplicationView(APIView):
+
+class WithdrawApplicationView(generics.GenericAPIView):
     queryset = Application.objects.all()
     permission_classes = [IsAuthenticated, CanAccessApplication]
-    lookup_url_kwarg = "application_id"
     lookup_field = "id"
-    http_method_names = ["patch"]
+    lookup_url_kwarg = "application_id"
 
-    def update(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         application = self.get_object()
 
         updated_application = withdraw_application_service(
