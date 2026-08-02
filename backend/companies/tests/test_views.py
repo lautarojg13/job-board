@@ -6,7 +6,8 @@ from rest_framework.test import APIClient
 from users.factories import CustomUserFactory
 
 # Adjust the import path according to your app structure
-from companies.models import Company
+from companies.models import Company, CompanyMember
+from companies.choices import CompanyRoleChoices
 
 
 @pytest.fixture
@@ -76,3 +77,78 @@ class TestCompanyListCreateView:
         
         # Verify persistence in database
         assert Company.objects.filter(name="Global Solutions").exists()
+        
+        
+@pytest.fixture
+def company(db):
+    """Fixture to create a base company instance."""
+    return Company.objects.create(
+        name="Acme Corporation",
+        description="Original description",
+        website="https://acme.com"
+    )
+
+
+@pytest.mark.django_db
+class TestCompanyRetrieveUpdateView:
+    
+    def get_url(self, company_id):
+        """Helper method to construct URL using company_id kwarg."""
+        return reverse("company-detail", kwargs={"company_id": company_id})
+
+    def test_retrieve_company_public_access_success(self, api_client, company):
+        """
+        Ensures any user (unauthenticated) can retrieve company details (GET request).
+        """
+        url = self.get_url(company.id)
+
+        response = api_client.get(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["id"] == company.id
+        assert response.data["name"] == company.name
+        assert response.data["description"] == company.description
+
+    def test_update_company_by_owner_success(self, api_client, company, django_user_model):
+        """
+        Ensures a user with OWNER role in CompanyMember can update company details.
+        """
+        # Given: An authenticated user assigned as OWNER of the company
+        owner_user = django_user_model.objects.create_user(username="owner", password="password123")
+        CompanyMember.objects.create(
+            company=company,
+            user=owner_user,
+            company_role=CompanyRoleChoices.OWNER
+        )
+        api_client.force_authenticate(user=owner_user)
+
+        url = self.get_url(company.id)
+        payload = {"name": "Acme Updated", "description": "New description", "website": "https://acme.com"}
+
+        # When: Sending a PATCH/PUT request to update company details
+        response = api_client.patch(url, payload, format="json")
+
+        # Then: Update must succeed with HTTP 200 OK
+        assert response.status_code == status.HTTP_200_OK
+        company.refresh_from_db()
+        assert company.name == "Acme Updated"
+        assert company.description == "New description"
+
+    def test_update_company_forbidden_for_non_owner(self, api_client, company, django_user_model):
+        """
+        Ensures an authenticated user without OWNER status gets HTTP 403 FORBIDDEN.
+        """
+        # Given: An authenticated regular user with no ownership
+        regular_user = django_user_model.objects.create_user(username="regular", password="password123")
+        api_client.force_authenticate(user=regular_user)
+
+        url = self.get_url(company.id)
+        payload = {"name": "Unauthorized Attempt"}
+
+        # When: Sending an update request
+        response = api_client.patch(url, payload, format="json")
+
+        # Then: System must block request and return HTTP 403 FORBIDDEN
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        company.refresh_from_db()
+        assert company.name != "Unauthorized Attempt"

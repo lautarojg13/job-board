@@ -1,5 +1,6 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
@@ -24,6 +25,7 @@ class CompanyListCreateView(generics.ListCreateAPIView):
         
 class CompanyRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     serializer_class = PublicCompanySerializer
+    queryset = Company.objects.all()
     permission_classes = [IsCompanyOwner]
     
     lookup_field = "id"
@@ -31,9 +33,7 @@ class CompanyRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     
     def perform_update(self, serializer):
         
-        company = self.get_object()
-        
-        if company.owner != self.request.user:
+        if not IsCompanyOwner:
             raise PermissionDenied()
         
         return serializer.save()
