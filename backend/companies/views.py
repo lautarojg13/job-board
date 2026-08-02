@@ -4,10 +4,10 @@ from rest_framework.permissions import IsAuthenticated
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 
-from .serializers import PublicCompanySerializer, OwnerCompanySerializer
-from .models import Company, CompanyMember
-from .permissions import IsCompanyOwner
-from .choices import CompanyRoleChoices
+from companies.serializers import PublicCompanySerializer, OwnerCompanySerializer
+from companies.models import Company, CompanyMember
+from companies.permissions import IsCompanyOwner
+from companies.choices import CompanyRoleChoices
 
 from jobs.serializers import JobPostListSerializer
 from jobs.models import JobPost
