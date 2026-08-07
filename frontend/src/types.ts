@@ -21,6 +21,8 @@ export interface CustomUserDetails {
   role: RoleEnum;
 }
 
+export type User = CustomUserDetails;
+
 export interface CustomUserDetailsRequest {
   username: string;
   first_name?: string;
@@ -49,7 +51,8 @@ export interface LoginRequest {
 }
 
 export interface Token {
-  key: string;
+  access: string;
+  refresh: string;
 }
 
 export interface RestAuthDetail {

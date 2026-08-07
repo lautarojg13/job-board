@@ -8,7 +8,8 @@ import {
 import {
   apiService,
   getStoredAuthToken,
-  setStoredAuthToken
+  setStoredAuthToken,
+  setStoredRefreshToken
 } from '../services/api';
 
 interface AuthContextType {
@@ -49,8 +50,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (data: LoginRequest) => {
     const res = await apiService.login(data);
-    setStoredAuthToken(res.key);
-    setToken(res.key);
+    setStoredAuthToken(res.access);
+    setStoredRefreshToken(res.refresh);
+    setToken(res.access);
     await fetchCurrentUser();
   };
 
@@ -66,6 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // ignore
     } finally {
       setStoredAuthToken(null);
+      setStoredRefreshToken(null);
       setToken(null);
       setUser(null);
     }

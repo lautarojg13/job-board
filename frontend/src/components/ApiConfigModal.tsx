@@ -87,7 +87,7 @@ export const ApiConfigModal: React.FC<ApiConfigModalProps> = ({ isOpen, onClose 
               />
             </div>
             <p className="text-[11px] text-slate-400 mt-1">
-              Expected endpoints include <code className="text-sky-400 font-mono">/jobs/get-jobs-list/</code>, <code className="text-sky-400 font-mono">/auth/login/</code>, etc.
+              Expected endpoints include <code className="text-sky-400 font-mono">/jobs/get-jobs-list/</code>, <code className="text-sky-400 font-mono">/auth/token/</code>, etc.
             </p>
           </div>
 
