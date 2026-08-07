@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Sparkles, Upload, Loader2, CheckCircle2, AlertCircle, FileText } from 'lucide-react';
-import { JobPost, ResumeAnalysis, TaskStatusResponse } from '../types';
+import { JobPost, ResumeAnalysisStart, TaskStatusResponse } from '../types';
 import { apiService } from '../services/api';
 
 interface ResumeAnalysisModalProps {
@@ -12,7 +12,7 @@ export const ResumeAnalysisModal: React.FC<ResumeAnalysisModalProps> = ({ job, o
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumeUrl, setResumeUrl] = useState<string>('');
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
-  const [analysisResult, setAnalysisResult] = useState<ResumeAnalysis | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<ResumeAnalysisStart | null>(null);
   const [taskStatus, setTaskStatus] = useState<TaskStatusResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,9 +35,9 @@ export const ResumeAnalysisModal: React.FC<ResumeAnalysisModalProps> = ({ job, o
       const res = await apiService.getResumeAnalysis(job.id, resumeInput);
       setAnalysisResult(res);
 
-      // Optionally test polling task status endpoint as per schema
+      // Poll task status with the real task_id returned by the backend
       try {
-        const tStatus = await apiService.getTaskStatus('task_analysis_' + job.id);
+        const tStatus = await apiService.getTaskStatus(res.task_id);
         setTaskStatus(tStatus);
       } catch {
         // Task status optional fallback
@@ -139,7 +139,14 @@ export const ResumeAnalysisModal: React.FC<ResumeAnalysisModalProps> = ({ job, o
               <span>Analysis Processed Successfully</span>
             </div>
             <p className="text-slate-300">
-              Resume analyzed at: <code className="text-sky-300 font-mono break-all">{analysisResult.resume}</code>
+              {analysisResult.message ? (
+                <>
+                  <span className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Server</span><br />
+                  <span className="text-sky-300">{analysisResult.message}</span>
+                </>
+              ) : (
+                'Analysis task started successfully.'
+              )}
             </p>
             {taskStatus && (
               <div className="p-3 bg-slate-950 rounded-lg border border-slate-800 text-slate-300 space-y-1">

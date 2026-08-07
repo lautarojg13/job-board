@@ -25,7 +25,7 @@ import {
   ApplicationStatusUpdate,
   JobSearchInputRequest,
   TaskStatusResponse,
-  ResumeAnalysis,
+  ResumeAnalysisStart,
   JobsListQueryParams,
   ApplicationsQueryParams,
   PatchedCustomUserDetailsRequest
@@ -489,8 +489,10 @@ function handleMockRequest<T>(endpoint: string, options: RequestInit): T {
   // Resume Analysis
   const resumeAnalysisMatch = path.match(/^\/jobs\/get_resume_analysis\/(\d+)\/$/);
   if (resumeAnalysisMatch && method === 'POST') {
+    const taskId = 'demo_task_' + Math.random().toString(36).substring(2, 10);
     return {
-      resume: 'https://example.com/resumes/analyzed_resume.pdf'
+      task_id: taskId,
+      message: 'Análisis de CV iniciado'
     } as T;
   }
 
@@ -609,12 +611,12 @@ export const apiService = {
     if (resume instanceof File) {
       const formData = new FormData();
       formData.append('resume', resume);
-      return apiFetch<ResumeAnalysis>(`/jobs/get_resume_analysis/${job_id}/`, {
+      return apiFetch<ResumeAnalysisStart>(`/jobs/get_resume_analysis/${job_id}/`, {
         method: 'POST',
         body: formData
       });
     } else {
-      return apiFetch<ResumeAnalysis>(`/jobs/get_resume_analysis/${job_id}/`, {
+      return apiFetch<ResumeAnalysisStart>(`/jobs/get_resume_analysis/${job_id}/`, {
         method: 'POST',
         body: JSON.stringify({ resume })
       });

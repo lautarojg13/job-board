@@ -219,8 +219,9 @@ export interface ResumeAnalysisRequest {
   resume: File | string;
 }
 
-export interface ResumeAnalysis {
-  resume: string;
+export interface ResumeAnalysisStart {
+  task_id: string;
+  message?: string;
 }
 
 export interface TaskStatusResponse {
