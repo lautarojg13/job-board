@@ -17,11 +17,14 @@ class CompanySerializer(serializers.ModelSerializer):
         fields = ["id", "name", "description", "website"]
 
 class PublicCompanySerializer(serializers.ModelSerializer):
-    followers_count = serializers.IntegerField(read_only=True)
+    followers_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Company
         fields = ["id", "name", "description", "website", "followers_count"]
+
+    def get_followers_count(self, obj):
+        return getattr(obj, "followers_count", obj.followers.count())
 
 class OwnerCompanySerializer(serializers.ModelSerializer):
     members = CompanyMemberSerializer(many=True, read_only=True)

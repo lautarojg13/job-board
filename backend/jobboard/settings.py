@@ -32,6 +32,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'drf_spectacular',
     
+    'corsheaders',
+    
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -54,6 +56,7 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = "users.CustomUser"
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -95,7 +98,7 @@ DATABASES = {
         'USER': config("DB_USER"),
         'PASSWORD': config("DB_PASSWORD"),
         'HOST': config("DB_HOST", default='localhost'),
-        'PORT': config("DB_PORT", default='5432'),
+        'PORT': config("DB_PORT", default='3306'),
     }
 }
 
@@ -155,7 +158,7 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Job Board API',
-    'DESCRIPTION': 'API RESTful job posts, applications managing and jobs AI search',
+    'DESCRIPTION': 'API RESTful with job postings, applications, AI job matching, company management and authentication.',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
@@ -167,6 +170,11 @@ SPECTACULAR_SETTINGS = {
             'name': 'Authorization',
             'description': 'Write your token using this format: Bearer <your_jwt>'
         }
+    },
+    
+    'ENUM_NAME_OVERRIDES': {
+        'ApplicationStatusEnum': 'applications.choices.ApplicationStatus',
+        'JobPostStatusEnum': 'jobs.choices.JobPostStatus',
     }
 }
 
@@ -235,10 +243,17 @@ EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
 
-ACCOUNT_LOGIN_METHODS = {'email', 'username'}
+ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
+ACCOUNT_MAX_EMAIL_ADDRESSES = 1
 
 ACCOUNT_ADAPTER = 'users.adapter.CustomAccountAdapter'
+
+CORS_ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in config("CORS_ALLOWED_ORIGINS", default="").split(",")
+    if origin.strip()
+]

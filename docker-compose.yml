@@ -23,12 +23,11 @@ services:
     ports:
       - "6379:6379"
 
-  web:
+  backend:
     build: 
       context: ./backend
       dockerfile: Dockerfile
-    container_name: django_web
-    entrypoint: ["/app/entrypoint.sh"]
+    entrypoint: ["sh", "/app/entrypoint.sh"]
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend:/app
@@ -58,14 +57,14 @@ services:
       redis:
         condition: service_started
 
-  # frontend:
-  #   build: ./frontend
-  #   container_name: react_frontend
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - ./frontend:/app
-  #     - /app/node_modules
+  frontend:
+    build: ./frontend
+    container_name: react_frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 
 volumes:
   mysql_data:

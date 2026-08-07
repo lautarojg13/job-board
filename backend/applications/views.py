@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status, generics
+from rest_framework.views import APIView
 
 from jobs.models import JobPost
 
@@ -75,14 +76,14 @@ class RespondToApplicationView(generics.UpdateAPIView):
             status=status.HTTP_200_OK
         )
     
-class WithdrawApplicationView(generics.UpdateAPIView):
+
+class WithdrawApplicationView(generics.GenericAPIView):
     queryset = Application.objects.all()
     permission_classes = [IsAuthenticated, CanAccessApplication]
-    lookup_url_kwarg = "application_id"
     lookup_field = "id"
-    http_method_names = ["patch"]
+    lookup_url_kwarg = "application_id"
 
-    def update(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         application = self.get_object()
 
         updated_application = withdraw_application_service(
