@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { ApiConfigProvider } from './context/ApiConfigContext';
+import { ApiConfigProvider, useApiConfig } from './context/ApiConfigContext';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { Header, ActiveTab } from './components/Header';
+import { Footer } from './components/Footer';
 import { ApiConfigModal } from './components/ApiConfigModal';
 import { AuthModal, AuthMode } from './components/AuthModal';
 import { JobsView } from './views/JobsView';
@@ -15,10 +17,39 @@ function MainApp() {
   const [isConfigModalOpen, setIsConfigModalOpen] = useState<boolean>(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authMode, setAuthMode] = useState<AuthMode>('login');
+  const { showDemoConfigUI } = useApiConfig();
 
   const handleOpenAuthModal = (mode: AuthMode = 'login') => {
     setAuthMode(mode);
     setIsAuthModalOpen(true);
+  };
+
+  const renderActiveView = () => {
+    switch (activeTab) {
+      case 'jobs':
+      case 'ai-match':
+        return (
+          <JobsView
+            onNavigateToEmployer={() => setActiveTab('employer')}
+            onNavigateToCompanies={() => setActiveTab('companies')}
+          />
+        );
+      case 'applications':
+        return <ApplicationsView />;
+      case 'employer':
+        return <EmployerDashboard />;
+      case 'companies':
+        return <CompaniesView onSelectJob={() => setActiveTab('jobs')} />;
+      case 'profile':
+        return <ProfileView />;
+      default:
+        return (
+          <JobsView
+            onNavigateToEmployer={() => setActiveTab('employer')}
+            onNavigateToCompanies={() => setActiveTab('companies')}
+          />
+        );
+    }
   };
 
   return (
@@ -32,59 +63,22 @@ function MainApp() {
       />
 
       {/* Main Content View Switcher */}
-      <main className="flex-1">
-        {activeTab === 'jobs' && (
-          <JobsView
-            onNavigateToEmployer={() => setActiveTab('employer')}
-            onNavigateToCompanies={() => setActiveTab('companies')}
-          />
-        )}
+      <main className="flex-1">{renderActiveView()}</main>
 
-        {activeTab === 'ai-match' && (
-          <JobsView
-            onNavigateToEmployer={() => setActiveTab('employer')}
-            onNavigateToCompanies={() => setActiveTab('companies')}
-          />
-        )}
-
-        {activeTab === 'applications' && <ApplicationsView />}
-
-        {activeTab === 'employer' && <EmployerDashboard />}
-
-        {activeTab === 'companies' && (
-          <CompaniesView onSelectJob={(jobId) => setActiveTab('jobs')} />
-        )}
-
-        {activeTab === 'profile' && <ProfileView />}
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p>© 2026 JobBoard — Powered by Django REST Framework & React 19</p>
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => setIsConfigModalOpen(true)}
-              className="hover:text-slate-300 transition-colors"
-            >
-              API Base URL Settings
-            </button>
-            <span>•</span>
-            <button
-              onClick={() => handleOpenAuthModal('login')}
-              className="hover:text-slate-300 transition-colors"
-            >
-              Auth Gateway
-            </button>
-          </div>
-        </div>
-      </footer>
+      {/* Footer Navigation & Settings */}
+      <Footer
+        showDemoConfigUI={showDemoConfigUI}
+        onOpenConfigModal={() => setIsConfigModalOpen(true)}
+        onOpenAuthModal={(m) => handleOpenAuthModal(m || 'login')}
+      />
 
       {/* Global Modals */}
-      <ApiConfigModal
-        isOpen={isConfigModalOpen}
-        onClose={() => setIsConfigModalOpen(false)}
-      />
+      {showDemoConfigUI && (
+        <ApiConfigModal
+          isOpen={isConfigModalOpen}
+          onClose={() => setIsConfigModalOpen(false)}
+        />
+      )}
 
       <AuthModal
         isOpen={isAuthModalOpen}
@@ -97,10 +91,12 @@ function MainApp() {
 
 export default function App() {
   return (
-    <ApiConfigProvider>
-      <AuthProvider>
-        <MainApp />
-      </AuthProvider>
-    </ApiConfigProvider>
+    <ThemeProvider>
+      <ApiConfigProvider>
+        <AuthProvider>
+          <MainApp />
+        </AuthProvider>
+      </ApiConfigProvider>
+    </ThemeProvider>
   );
 }

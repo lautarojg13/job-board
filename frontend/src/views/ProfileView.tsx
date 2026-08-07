@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { User, Mail, Shield, Lock, Save, CheckCircle2, AlertCircle, Loader2, LogOut } from 'lucide-react';
+import { User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
+import { ProfileHeader } from '../components/profile/ProfileHeader';
+import { ProfileDetailsForm } from '../components/profile/ProfileDetailsForm';
+import { ProfilePasswordForm } from '../components/profile/ProfilePasswordForm';
 
 export const ProfileView: React.FC = () => {
   const { user, updateProfile, logout, isAuthenticated } = useAuth();
@@ -80,170 +83,33 @@ export const ProfileView: React.FC = () => {
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-8 text-slate-100">
       {/* Account Overview Header */}
-      <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="w-14 h-14 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center font-bold text-xl">
-            {user?.first_name?.[0] || user?.username?.[0] || 'U'}
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-white">
-              {user?.first_name} {user?.last_name} ({user?.username})
-            </h1>
-            <p className="text-xs text-slate-400 flex items-center mt-0.5">
-              <Mail className="w-3.5 h-3.5 mr-1 text-slate-500" />
-              {user?.email}
-              <span className="mx-2">•</span>
-              <Shield className="w-3.5 h-3.5 mr-1 text-sky-400" />
-              Role: <span className="font-semibold text-sky-300 ml-1">{user?.role || 'USER'}</span>
-            </p>
-          </div>
-        </div>
-
-        <button
-          onClick={() => logout()}
-          className="px-4 py-2 bg-slate-800 hover:bg-rose-950/40 text-slate-300 hover:text-rose-400 border border-slate-700/80 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-colors"
-        >
-          <LogOut className="w-4 h-4" />
-          <span>Sign Out</span>
-        </button>
-      </div>
+      <ProfileHeader user={user} onLogout={logout} />
 
       {/* Edit Profile Form */}
-      <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-5">
-        <div className="flex items-center space-x-2.5 pb-3 border-b border-slate-800">
-          <User className="w-5 h-5 text-sky-400" />
-          <h2 className="text-base font-bold text-white">Update Personal Details</h2>
-        </div>
-
-        {profileMsg && (
-          <div className="p-3.5 rounded-lg bg-emerald-950/30 border border-emerald-500/30 text-emerald-300 text-xs flex items-center space-x-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>{profileMsg}</span>
-          </div>
-        )}
-
-        {profileError && (
-          <div className="p-3.5 rounded-lg bg-rose-950/30 border border-rose-500/30 text-rose-300 text-xs flex items-center space-x-2">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-            <span>{profileError}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleProfileSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">
-              Username
-            </label>
-            <input
-              type="text"
-              required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-sky-500"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">
-                First Name
-              </label>
-              <input
-                type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-sky-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">
-                Last Name
-              </label>
-              <input
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-sky-500"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-2">
-            <button
-              type="submit"
-              disabled={isUpdating}
-              className="px-5 py-2.5 bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold rounded-lg flex items-center space-x-2 transition-colors"
-            >
-              {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              <span>Save Profile</span>
-            </button>
-          </div>
-        </form>
-      </div>
+      <ProfileDetailsForm
+        username={username}
+        setUsername={setUsername}
+        firstName={firstName}
+        setFirstName={setFirstName}
+        lastName={lastName}
+        setLastName={setLastName}
+        isUpdating={isUpdating}
+        profileMsg={profileMsg}
+        profileError={profileError}
+        onSubmit={handleProfileSubmit}
+      />
 
       {/* Change Password Form */}
-      <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-5">
-        <div className="flex items-center space-x-2.5 pb-3 border-b border-slate-800">
-          <Lock className="w-5 h-5 text-sky-400" />
-          <h2 className="text-base font-bold text-white">Change Account Password</h2>
-        </div>
-
-        {passMsg && (
-          <div className="p-3.5 rounded-lg bg-emerald-950/30 border border-emerald-500/30 text-emerald-300 text-xs flex items-center space-x-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>{passMsg}</span>
-          </div>
-        )}
-
-        {passError && (
-          <div className="p-3.5 rounded-lg bg-rose-950/30 border border-rose-500/30 text-rose-300 text-xs flex items-center space-x-2">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-            <span>{passError}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleChangePassword} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">
-                New Password
-              </label>
-              <input
-                type="password"
-                required
-                value={newPassword1}
-                onChange={(e) => setNewPassword1(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-sky-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">
-                Confirm New Password
-              </label>
-              <input
-                type="password"
-                required
-                value={newPassword2}
-                onChange={(e) => setNewPassword2(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-sky-500"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-2">
-            <button
-              type="submit"
-              disabled={isChangingPass}
-              className="px-5 py-2.5 bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold rounded-lg flex items-center space-x-2 transition-colors"
-            >
-              {isChangingPass ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
-              <span>Update Password</span>
-            </button>
-          </div>
-        </form>
-      </div>
+      <ProfilePasswordForm
+        newPassword1={newPassword1}
+        setNewPassword1={setNewPassword1}
+        newPassword2={newPassword2}
+        setNewPassword2={setNewPassword2}
+        isChangingPass={isChangingPass}
+        passMsg={passMsg}
+        passError={passError}
+        onSubmit={handleChangePassword}
+      />
     </div>
   );
 };
