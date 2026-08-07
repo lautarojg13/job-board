@@ -4,7 +4,7 @@ import {
   setStoredApiBaseUrl,
   isDemoModeEnabled,
   setDemoModeEnabled,
-  getStoredAuthToken
+  IS_DEMO_FEATURE_ALLOWED
 } from '../services/api';
 
 interface ApiConfigContextType {
@@ -12,6 +12,7 @@ interface ApiConfigContextType {
   setBaseUrl: (url: string) => void;
   demoMode: boolean;
   setDemoMode: (enabled: boolean) => void;
+  showDemoConfigUI: boolean;
   isTestingConnection: boolean;
   testConnection: () => Promise<{ success: boolean; message: string }>;
 }
@@ -30,7 +31,7 @@ export const ApiConfigProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const handleSetDemoMode = (enabled: boolean) => {
     setDemoModeEnabled(enabled);
-    setDemoModeState(enabled);
+    setDemoModeState(isDemoModeEnabled());
   };
 
   const testConnection = async (): Promise<{ success: boolean; message: string }> => {
@@ -59,6 +60,7 @@ export const ApiConfigProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setBaseUrl: handleSetBaseUrl,
         demoMode,
         setDemoMode: handleSetDemoMode,
+        showDemoConfigUI: IS_DEMO_FEATURE_ALLOWED,
         isTestingConnection,
         testConnection
       }}
