@@ -384,8 +384,10 @@ export function handleMockRequest<T>(endpoint: string, options: RequestInit): T 
   // Resume Analysis
   const resumeAnalysisMatch = path.match(/^\/jobs\/get_resume_analysis\/(\d+)\/$/);
   if (resumeAnalysisMatch && method === 'POST') {
+    const taskId = 'demo_task_' + Math.random().toString(36).substring(2, 10);
     return {
-      resume: 'https://example.com/resumes/analyzed_resume.pdf'
+      task_id: taskId,
+      message: 'Analizing resume...'
     } as T;
   }
 
