@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Sparkles, Send, Loader2, Search, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { apiService } from '../services/api';
-import { JobPostList } from '../types';
 
 interface AiAgentSearchProps {
   onFilteredResults: (prompt: string) => void;

@@ -1,10 +1,10 @@
 import React from 'react';
 import { Building2, Globe, Users } from 'lucide-react';
-import { PublicCompany, JobPostList } from '../../types';
+import { PublicCompany, JobPost } from '../../types';
 
 interface CompanyDetailContentProps {
   company: PublicCompany;
-  jobs: JobPostList[];
+  jobs: JobPost[];
   onClose: () => void;
   onSelectJob?: (jobId: number) => void;
 }

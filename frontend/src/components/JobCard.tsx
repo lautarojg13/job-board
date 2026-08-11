@@ -1,9 +1,9 @@
 import React from 'react';
 import { MapPin, DollarSign, Clock, Building2, Briefcase, ChevronRight, CheckCircle2 } from 'lucide-react';
-import { JobPostList, PublicCompany } from '../types';
+import { JobPost, PublicCompany } from '../types';
 
 interface JobCardProps {
-  job: JobPostList;
+  job: JobPost;
   company?: PublicCompany;
   onSelect: (jobId: number) => void;
   onQuickApply?: (jobId: number) => void;

@@ -3,7 +3,6 @@ import {
   JobPost,
   ApplicationDetail,
   CustomUserDetails,
-  JobPostList,
   ApplicationList
 } from '../types';
 import {
@@ -162,11 +161,13 @@ export function handleMockRequest<T>(endpoint: string, options: RequestInit): T 
         description: j.description,
         company: j.company,
         location: j.location,
+        posted_by: j.posted_by,
+        posted_at: j.posted_at,
         status: j.status,
         employment_type: j.employment_type,
         salary: j.salary,
         work_mode: j.work_mode
-      } as JobPostList));
+      } as JobPost));
     return result as T;
   }
 
@@ -178,11 +179,13 @@ export function handleMockRequest<T>(endpoint: string, options: RequestInit): T 
       description: j.description,
       company: j.company,
       location: j.location,
+      posted_by: j.posted_by,
+      posted_at: j.posted_at,
       status: j.status,
       employment_type: j.employment_type,
       salary: j.salary,
       work_mode: j.work_mode
-    } as JobPostList));
+    } as JobPost));
 
     const titleParam = queryParams.get('title') || queryParams.get('search');
     const locationParam = queryParams.get('location');
@@ -385,7 +388,8 @@ export function handleMockRequest<T>(endpoint: string, options: RequestInit): T 
   const resumeAnalysisMatch = path.match(/^\/jobs\/get_resume_analysis\/(\d+)\/$/);
   if (resumeAnalysisMatch && method === 'POST') {
     return {
-      resume: 'https://example.com/resumes/analyzed_resume.pdf'
+      task_id: `task_analysis_${resumeAnalysisMatch[1]}`,
+      message: 'Análisis de CV iniciado'
     } as T;
   }
 
