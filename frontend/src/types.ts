@@ -117,18 +117,6 @@ export interface JobPost {
   work_mode?: WorkModeEnum;
 }
 
-export interface JobPostList {
-  id: number;
-  title: string;
-  description?: string | null;
-  company?: number | null;
-  location?: string | null;
-  status?: JobPostStatusEnum;
-  employment_type?: EmploymentTypeEnum;
-  salary?: number | null;
-  work_mode?: WorkModeEnum;
-}
-
 export interface JobPostCreateRequest {
   title: string;
   description?: string | null;

@@ -1,7 +1,7 @@
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer
 
-from .models import JobPost
+from jobs.models import JobPost
 from companies.models import CompanyMember
 from companies.choices import CompanyRoleChoices
 
@@ -15,7 +15,7 @@ class JobPostSerializer(ModelSerializer):
 class JobPostListSerializer(ModelSerializer):
     class Meta:
         model = JobPost
-        fields = ['id', 'title', 'description', 'company', 'location', 'status', 'employment_type', 'salary', 'work_mode']
+        fields = ['id', 'title', 'description', 'company', 'location', 'posted_by', 'posted_at', 'status', 'employment_type', 'salary', 'work_mode']
         
 class JobPostCreateSerializer(ModelSerializer):
 

@@ -83,6 +83,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({ onSelectJob }) => 
 
       {/* View Company Detail Modal */}
       <CompanyModal
+        isOpen={Boolean(selectedCompanyId)}
         companyId={selectedCompanyId}
         onClose={() => setSelectedCompanyId(null)}
         onSelectJob={onSelectJob}
@@ -90,6 +91,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({ onSelectJob }) => 
 
       {/* Register Company Modal */}
       <CompanyModal
+        isOpen={isRegistering}
         companyId={null}
         isCreateMode={true}
         onClose={() => setIsRegistering(false)}
