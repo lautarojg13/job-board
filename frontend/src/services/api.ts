@@ -25,6 +25,7 @@ import {
   JobSearchInputRequest,
   TaskStatusResponse,
   ResumeAnalysisStart,
+  ResumeAnalysisResult,
   JobsListQueryParams,
   ApplicationsQueryParams,
   PatchedCustomUserDetailsRequest
@@ -53,8 +54,9 @@ async function apiFetch<T>(
   return djangoFetch<T>(endpoint, options);
 }
 
-// Public API Service methods mapping 1:1 to api_documentation.json
-
+/**
+ * Unified Public API Service mapping 1:1 to Django REST API endpoints
+ */
 export const apiService = {
   // Auth
   login: (data: LoginRequest) =>
@@ -170,8 +172,8 @@ export const apiService = {
     }
   },
 
-  getTaskStatus: (task_id: string) =>
-    apiFetch<TaskStatusResponse>(`/jobs/task-status/${task_id}/`, { method: 'GET' }),
+  getTaskStatus: <T = ResumeAnalysisResult>(task_id: string) =>
+    apiFetch<TaskStatusResponse<T>>(`/jobs/task-status/${task_id}/`, { method: 'GET' }),
 
   // Applications
   applyToJob: (job_id: number, data: ApplicationCreateRequest) => {

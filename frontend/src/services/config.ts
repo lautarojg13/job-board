@@ -14,13 +14,20 @@ export const IS_DEMO_FEATURE_ALLOWED =
   import.meta.env.VITE_ENABLE_DEMO_MODE !== 'false' &&
   import.meta.env.VITE_ENABLE_DEMO_MODE !== '0';
 
+export function cleanBaseUrl(url: string | null | undefined): string {
+  if (!url) return 'http://localhost:8000';
+  // Remove surrounding quotes, whitespace and trailing slashes
+  return url.trim().replace(/^["']|["']$/g, '').replace(/\/+$/, '');
+}
+
 export function getStoredApiBaseUrl(): string {
   const envUrl = import.meta.env.VITE_API_BASE_URL;
-  return localStorage.getItem(BASE_URL_KEY) || envUrl || 'http://localhost:8000';
+  const stored = localStorage.getItem(BASE_URL_KEY);
+  return cleanBaseUrl(stored || envUrl);
 }
 
 export function setStoredApiBaseUrl(url: string) {
-  localStorage.setItem(BASE_URL_KEY, url.replace(/\/$/, ''));
+  localStorage.setItem(BASE_URL_KEY, cleanBaseUrl(url));
 }
 
 export function getStoredAuthToken(): string | null {

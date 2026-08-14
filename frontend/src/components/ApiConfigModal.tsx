@@ -22,7 +22,7 @@ export const ApiConfigModal: React.FC<ApiConfigModalProps> = ({ isOpen, onClose 
 
   const handleTest = async () => {
     setBaseUrl(inputUrl);
-    const res = await testConnection();
+    const res = await testConnection(inputUrl);
     setTestResult(res);
   };
 
