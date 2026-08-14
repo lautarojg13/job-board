@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Briefcase } from 'lucide-react';
-import { JobPostList, PublicCompany, JobsListQueryParams, JobPost } from '../types';
+import { JobPost, PublicCompany, JobsListQueryParams } from '../types';
 import { apiService } from '../services/api';
 import { JobCard } from '../components/JobCard';
 import { JobSearchFilter } from '../components/JobSearchFilter';
@@ -18,7 +18,7 @@ interface JobsViewProps {
 }
 
 export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToEmployer }) => {
-  const [jobs, setJobs] = useState<JobPostList[]>([]);
+  const [jobs, setJobs] = useState<JobPost[]>([]);
   const [companiesMap, setCompaniesMap] = useState<Record<number, PublicCompany>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

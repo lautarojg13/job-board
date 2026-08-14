@@ -13,7 +13,6 @@ import {
   PublicCompanyRequest,
   PatchedPublicCompanyRequest,
   JobPost,
-  JobPostList,
   JobPostCreateRequest,
   JobPostCreate,
   PatchedJobPostRequest,
@@ -25,7 +24,7 @@ import {
   ApplicationStatusUpdate,
   JobSearchInputRequest,
   TaskStatusResponse,
-  ResumeAnalysis,
+  ResumeAnalysisStart,
   JobsListQueryParams,
   ApplicationsQueryParams,
   PatchedCustomUserDetailsRequest
@@ -115,7 +114,7 @@ export const apiService = {
     if (params?.ordering) q.set('ordering', params.ordering);
     if (params?.search) q.set('search', params.search);
     const qs = q.toString() ? `?${q.toString()}` : '';
-    return apiFetch<JobPostList[]>(`/companies/companies/${company_id}/jobs/${qs}`, { method: 'GET' });
+    return apiFetch<JobPost[]>(`/companies/companies/${company_id}/jobs/${qs}`, { method: 'GET' });
   },
 
   // Jobs
@@ -130,7 +129,7 @@ export const apiService = {
     if (params?.search) q.set('search', params.search);
     if (params?.title) q.set('title', params.title);
     const qs = q.toString() ? `?${q.toString()}` : '';
-    return apiFetch<JobPostList[]>(`/jobs/get-jobs-list/${qs}`, { method: 'GET' });
+    return apiFetch<JobPost[]>(`/jobs/get-jobs-list/${qs}`, { method: 'GET' });
   },
 
   getJobDetails: (job_id: number) =>
@@ -160,12 +159,12 @@ export const apiService = {
     if (resume instanceof File) {
       const formData = new FormData();
       formData.append('resume', resume);
-      return apiFetch<ResumeAnalysis>(`/jobs/get_resume_analysis/${job_id}/`, {
+      return apiFetch<ResumeAnalysisStart>(`/jobs/get_resume_analysis/${job_id}/`, {
         method: 'POST',
         body: formData
       });
     } else {
-      return apiFetch<ResumeAnalysis>(`/jobs/get_resume_analysis/${job_id}/`, {
+      return apiFetch<ResumeAnalysisStart>(`/jobs/get_resume_analysis/${job_id}/`, {
         method: 'POST',
         body: JSON.stringify({ resume })
       });

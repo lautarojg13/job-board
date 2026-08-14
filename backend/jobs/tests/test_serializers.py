@@ -94,6 +94,8 @@ class TestJobPostListSerializer:
             'work_mode',
             'employment_type',
             'salary',
+            'posted_by',
+            'posted_at',
         }
 
         assert set(serializer.data.keys()) == expected_fields, f"Expected fields: {expected_fields}, but got: {set(serializer.data.keys())}"
