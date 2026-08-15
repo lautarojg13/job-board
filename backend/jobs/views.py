@@ -12,6 +12,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.decorators import APIView
+from rest_framework.exceptions import ValidationError
 
 
 from agents.serializers.input_serializers import ResumeAnalysisSerializer, JobSearchInputSerializer
@@ -22,6 +23,7 @@ from jobs.filters import JobPostFilter
 from jobs.choices import JobPostStatus
 from jobs.models import JobPost
 from jobs.tasks import process_ai_search_task, analyze_resume_task
+from jobs.utils.pdf_handler import extract_text_from_pdf
 
 from celery.result import AsyncResult
 
@@ -51,21 +53,25 @@ class ResumeAnalysisView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ResumeAnalysisSerializer
 
-    async def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         resume_file = serializer.validated_data['resume']
         job_id = self.kwargs.get("job_id")
 
-        task = analyze_resume_task.delay(job_id, resume_file)
+        resume_content = extract_text_from_pdf(resume_file)
+        if not resume_content or resume_content.startswith("Error:"):
+            raise ValidationError("Could not extract text from the PDF.")
+
+        task = analyze_resume_task.delay(job_id, resume_content)
 
         return Response({"task_id": task.id, "message": "Análisis de CV iniciado"}, status=status.HTTP_202_ACCEPTED)
 
 class GetJobsByAgentView(generics.GenericAPIView):
     serializer_class = JobSearchInputSerializer
     
-    async def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
