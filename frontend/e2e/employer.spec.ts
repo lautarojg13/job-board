@@ -41,7 +41,8 @@ test.describe('Employer Job Management CRUD', () => {
     await expect(createdJobTitle).toBeVisible({ timeout: 10000 });
 
     // 5. Delete the created job
-    const deleteBtn = page.locator(`div:has-text("${uniqueTitle}")`).getByTitle('Delete Job').first();
+    const jobCard = page.locator('div').filter({ hasText: uniqueTitle }).filter({ has: page.getByTitle('Delete Job') }).last();
+    const deleteBtn = jobCard.getByTitle('Delete Job');
     await expect(deleteBtn).toBeVisible();
 
     page.once('dialog', dialog => dialog.accept());
