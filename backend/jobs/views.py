@@ -1,9 +1,3 @@
-from drf_spectacular.utils import (
-    extend_schema,
-    inline_serializer,
-    OpenApiParameter,
-)
-from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, inline_serializer
 
 
@@ -53,6 +47,15 @@ class ResumeAnalysisView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ResumeAnalysisSerializer
 
+    @extend_schema(
+        responses=inline_serializer(
+            name="ResumeAnalysisStart",
+            fields={
+                "task_id": serializers.CharField(),
+                "message": serializers.CharField(),
+            },
+        )
+    )
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -70,7 +73,16 @@ class ResumeAnalysisView(generics.GenericAPIView):
 
 class GetJobsByAgentView(generics.GenericAPIView):
     serializer_class = JobSearchInputSerializer
-    
+
+    @extend_schema(
+        responses=inline_serializer(
+            name="JobSearchStart",
+            fields={
+                "task_id": serializers.CharField(),
+                "message": serializers.CharField(),
+            },
+        )
+    )
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
