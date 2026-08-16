@@ -39,8 +39,12 @@ export const JobSearchFilter: React.FC<JobSearchFilterProps> = ({ filters, onCha
             type="text"
             value={filters.search || filters.title || ''}
             onChange={(e) => {
-              handleInputChange('search', e.target.value);
-              handleInputChange('title', e.target.value);
+              const val = e.target.value === '' ? undefined : e.target.value;
+              onChange({
+                ...filters,
+                search: val,
+                title: val
+              });
             }}
             placeholder="Job title, keywords, or company"
             className="w-full pl-10 pr-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-colors"
