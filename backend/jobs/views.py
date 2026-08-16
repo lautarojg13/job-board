@@ -102,7 +102,7 @@ class GetOwnerJobPostListView(generics.ListAPIView):
         if getattr(self, "swagger_fake_view", False):
                     return JobPost.objects.none()
         
-        return JobPost.objects.filter(posted_by=self.request.user)
+        return JobPost.objects.filter(posted_by=self.request.user).exclude(status=JobPostStatus.ARCHIVED)
 
 class JobPostRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = JobPost.objects.all()

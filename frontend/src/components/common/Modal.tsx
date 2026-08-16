@@ -81,6 +81,8 @@ export const Modal: React.FC<ModalProps> = ({
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn"
     >
       <div
+        role="dialog"
+        aria-modal="true"
         className={`bg-slate-950 border border-slate-800 rounded-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 text-slate-100 shadow-2xl relative ${maxWidthClasses[maxWidth] || maxWidthClasses.md} ${className}`}
       >
         {showCloseButton && (

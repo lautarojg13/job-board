@@ -70,7 +70,7 @@ export const UserActions: React.FC<UserActionsProps> = ({
             }`}
           >
             <User className="w-3.5 h-3.5 text-sky-400" />
-            <span className="font-semibold">{user?.username || 'Account'}</span>
+            <span className="font-semibold">{user?.username || user?.email || 'Account'}</span>
           </button>
           <button
             onClick={() => logout()}

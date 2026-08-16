@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import path from 'path';
+import { fileURLToPath } from 'node:url';
 import { E2E_USERS } from './users';
 import { loginAs } from './helpers';
 
@@ -9,12 +9,12 @@ test.describe('Job Applications Flow', () => {
     await loginAs(page, E2E_USERS.seeker.username, E2E_USERS.seeker.password);
 
     // 2. Click Quick Apply or open job details to apply
-    const applyButton = page.getByRole('button', { name: /Quick Apply|Apply Now/i }).first();
+    const applyButton = page.getByRole('button', { name: 'Apply' }).first();
     await expect(applyButton).toBeVisible({ timeout: 10000 });
     await applyButton.click();
 
     // 3. Attach resume fixture file
-    const resumePath = path.resolve(__dirname, 'fixtures/sample-resume.pdf');
+    const resumePath = fileURLToPath(new URL('./fixtures/sample-resume.pdf', import.meta.url));
     const fileInput = page.locator('input[type="file"]').first();
     await fileInput.setInputFiles(resumePath);
 
@@ -35,7 +35,7 @@ test.describe('Job Applications Flow', () => {
     await appsNavBtn.click();
 
     // The applications view should render application items
-    const applicationsHeader = page.getByText(/My Job Applications/i);
+    const applicationsHeader = page.getByText(/My Submitted Applications/i);
     await expect(applicationsHeader).toBeVisible({ timeout: 8000 });
   });
 });

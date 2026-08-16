@@ -10,6 +10,15 @@ export function handleAuthMock(ctx: MockRequestContext): MockHandlerResult {
 
   // Login: Obtain JWT access and refresh token
   if (path === '/auth/token/' && method === 'POST') {
+    const body = JSON.parse((options.body as string) || '{}');
+    const inputUser = body.username || body.email;
+    if (inputUser) {
+      state.user.username = inputUser;
+      state.user.email = body.email || (inputUser.includes('@') ? inputUser : `${inputUser}@example.com`);
+      state.user.role = 'USER';
+      saveMockState({ user: state.user });
+    }
+
     const access = 'demo_access_' + Math.random().toString(36).substring(2, 10);
     const refresh = 'demo_refresh_' + Math.random().toString(36).substring(2, 10);
     setStoredAuthToken(access);

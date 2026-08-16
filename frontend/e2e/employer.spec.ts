@@ -23,7 +23,7 @@ test.describe('Employer Job Management CRUD', () => {
     await expect(titleInput).toBeVisible();
     await titleInput.fill(uniqueTitle);
 
-    const descTextarea = page.getByPlaceholder(/Describe key responsibilities/i);
+    const descTextarea = page.getByPlaceholder(/Specify requirements, tech stack, and benefits/i);
     await expect(descTextarea).toBeVisible();
     await descTextarea.fill('Architecting scalable distributed web services with Django and React.');
 
@@ -41,8 +41,7 @@ test.describe('Employer Job Management CRUD', () => {
     await expect(createdJobTitle).toBeVisible({ timeout: 10000 });
 
     // 5. Delete the created job
-    const jobContainer = page.locator(`div:has-text("${uniqueTitle}")`).last();
-    const deleteBtn = jobContainer.getByTitle('Delete Job');
+    const deleteBtn = page.locator(`div:has-text("${uniqueTitle}")`).getByTitle('Delete Job').first();
     await expect(deleteBtn).toBeVisible();
 
     page.once('dialog', dialog => dialog.accept());
