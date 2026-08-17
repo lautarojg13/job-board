@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     
     'applications',
     'companies',
+    'core',
     'jobs',
     'users',
     'agents',
