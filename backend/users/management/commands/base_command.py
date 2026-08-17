@@ -12,6 +12,10 @@ from users.models import CustomUser
 
 
 class BaseSeedCommand(BaseCommand):
+    def execute(self, *args, **options):
+        self.verbosity = options.get("verbosity", 1)
+        return super().execute(*args, **options)
+
     def _create_users(self, total, role):
         next_index = get_next_seed_username_index()
         return [
@@ -22,6 +26,14 @@ class BaseSeedCommand(BaseCommand):
     def _persist_users(self, users):
         with transaction.atomic():
             created_users = CustomUser.objects.bulk_create(users)
+            user_ids = dict(
+                CustomUser.objects.filter(
+                    username__in=[user.username for user in created_users]
+                ).values_list("username", "id")
+            )
+            for user in created_users:
+                user.pk = user_ids[user.username]
+
             EmailAddress.objects.bulk_create(
                 [
                     EmailAddress(
