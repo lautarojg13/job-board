@@ -40,7 +40,7 @@ def _get_or_create_verified_user(email):
     user.set_password(E2E_PASSWORD)
     user.save()
 
-    EmailAddress.objects.get_or_create(
+    EmailAddress.objects.update_or_create(
         user=user,
         email=email,
         defaults={"verified": True, "primary": True},
