@@ -12,4 +12,4 @@ class JobPostQuerySet(models.QuerySet):
         return self.filter(employment_type__icontains=employment_type)
     
     def filter_by_min_salary(self, min_salary):
-        return self.filter(min_salary__gte=min_salary)
+        return self.filter(salary__gte=min_salary)
