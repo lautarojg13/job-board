@@ -21,6 +21,9 @@ from jobs.utils.pdf_handler import extract_text_from_pdf
 
 from celery.result import AsyncResult
 
+RESUME_ANALYSIS_STARTED_MESSAGE = "Análisis de CV iniciado"
+JOB_SEARCH_STARTED_MESSAGE = "Searching for jobs..."
+
 # Create your views here.
 
 class JobPostListView(generics.ListAPIView):
@@ -69,7 +72,7 @@ class ResumeAnalysisView(generics.GenericAPIView):
 
         task = analyze_resume_task.delay(job_id, resume_content)
 
-        return Response({"task_id": task.id, "message": "Análisis de CV iniciado"}, status=status.HTTP_202_ACCEPTED)
+        return Response({"task_id": task.id, "message": RESUME_ANALYSIS_STARTED_MESSAGE}, status=status.HTTP_202_ACCEPTED)
 
 class GetJobsByAgentView(generics.GenericAPIView):
     serializer_class = JobSearchInputSerializer
@@ -91,7 +94,7 @@ class GetJobsByAgentView(generics.GenericAPIView):
         
         task = process_ai_search_task.delay(user_prompt)
         
-        return Response({"task_id": task.id, "message": "Searching for jobs..."}, status=status.HTTP_202_ACCEPTED)
+        return Response({"task_id": task.id, "message": JOB_SEARCH_STARTED_MESSAGE}, status=status.HTTP_202_ACCEPTED)
 
 class GetOwnerJobPostListView(generics.ListAPIView):
     serializer_class = JobPostSerializer

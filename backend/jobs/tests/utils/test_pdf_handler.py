@@ -2,7 +2,9 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 from jobs.utils.pdf_handler import extract_text_from_pdf
 
-MINIMAL_RESUME_PDF = b"""%PDF-1.4
+EXPECTED_PDF_TEXT = "Resume content here for testing"
+
+MINIMAL_RESUME_PDF = f"""%PDF-1.4
 1 0 obj
 << /Type /Catalog /Pages 2 0 R >>
 endobj
@@ -18,7 +20,7 @@ stream
 BT
 /F1 12 Tf
 72 720 Td
-(Resume content here for testing) Tj
+({EXPECTED_PDF_TEXT}) Tj
 ET
 endstream
 endobj
@@ -28,7 +30,7 @@ endobj
 trailer
 << /Root 1 0 R /Size 6 >>
 %%EOF
-"""
+""".encode()
 
 
 def build_resume_file(content=MINIMAL_RESUME_PDF, name="resume.pdf"):
@@ -40,7 +42,7 @@ class TestExtractTextFromPdf:
     def test_returns_extracted_text_for_valid_pdf(self):
         result = extract_text_from_pdf(build_resume_file())
 
-        assert "Resume content here for testing" in result
+        assert EXPECTED_PDF_TEXT in result
 
     def test_returns_error_string_for_invalid_signature(self):
         content = b"\x00\x01\x02\x03" + b"Rest of content"

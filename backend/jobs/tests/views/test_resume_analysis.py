@@ -4,7 +4,11 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from unittest.mock import patch
 
-MINIMAL_RESUME_PDF = b"""%PDF-1.4
+from jobs.views import RESUME_ANALYSIS_STARTED_MESSAGE
+
+EXPECTED_RESUME_TEXT = "Resume content here for testing"
+
+MINIMAL_RESUME_PDF = f"""%PDF-1.4
 1 0 obj
 << /Type /Catalog /Pages 2 0 R >>
 endobj
@@ -20,7 +24,7 @@ stream
 BT
 /F1 12 Tf
 72 720 Td
-(Resume content here for testing) Tj
+({EXPECTED_RESUME_TEXT}) Tj
 ET
 endstream
 endobj
@@ -30,7 +34,7 @@ endobj
 trailer
 << /Root 1 0 R /Size 6 >>
 %%EOF
-"""
+""".encode()
 
 
 def build_resume_file(content=MINIMAL_RESUME_PDF, name="resume.pdf"):
@@ -49,14 +53,15 @@ class TestResumeAnalysis:
         client.force_authenticate(user=user)
 
         mock_extract_text.return_value = "Resume content"
-        mock_task.delay.return_value.id = "task-abc-123"
+        task_id = "task-abc-123"
+        mock_task.delay.return_value.id = task_id
 
         url = reverse("get_resume_analysis", kwargs={"job_id": job.id})
         response = client.post(url, {"resume": build_resume_file()}, format="multipart")
 
         assert response.status_code == 202
-        assert response.data["task_id"] == "task-abc-123"
-        assert response.data["message"] == "Análisis de CV iniciado"
+        assert response.data["task_id"] == task_id
+        assert response.data["message"] == RESUME_ANALYSIS_STARTED_MESSAGE
         mock_task.delay.assert_called_once_with(job.id, "Resume content")
 
     @pytest.mark.django_db
@@ -65,14 +70,15 @@ class TestResumeAnalysis:
         client = APIClient()
         client.force_authenticate(user=user)
 
-        mock_task.delay.return_value.id = "task-pdf-456"
+        task_id = "task-pdf-456"
+        mock_task.delay.return_value.id = task_id
 
         url = reverse("get_resume_analysis", kwargs={"job_id": job.id})
         response = client.post(url, {"resume": build_resume_file()}, format="multipart")
 
         assert response.status_code == 202
-        assert response.data["task_id"] == "task-pdf-456"
-        mock_task.delay.assert_called_once_with(job.id, "Resume content here for testing")
+        assert response.data["task_id"] == task_id
+        mock_task.delay.assert_called_once_with(job.id, EXPECTED_RESUME_TEXT)
 
     @pytest.mark.django_db
     @patch("jobs.views.analyze_resume_task")
