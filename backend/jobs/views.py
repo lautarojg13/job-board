@@ -1,9 +1,3 @@
-from drf_spectacular.utils import (
-    extend_schema,
-    inline_serializer,
-    OpenApiParameter,
-)
-from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, inline_serializer
 
 
@@ -12,6 +6,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.decorators import APIView
+from rest_framework.exceptions import ValidationError
 
 
 from agents.serializers.input_serializers import ResumeAnalysisSerializer, JobSearchInputSerializer
@@ -22,8 +17,12 @@ from jobs.filters import JobPostFilter
 from jobs.choices import JobPostStatus
 from jobs.models import JobPost
 from jobs.tasks import process_ai_search_task, analyze_resume_task
+from jobs.utils.pdf_handler import extract_text_from_pdf
 
 from celery.result import AsyncResult
+
+RESUME_ANALYSIS_STARTED_MESSAGE = "Análisis de CV iniciado"
+JOB_SEARCH_STARTED_MESSAGE = "Searching for jobs..."
 
 # Create your views here.
 
@@ -51,21 +50,43 @@ class ResumeAnalysisView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ResumeAnalysisSerializer
 
-    async def post(self, request, *args, **kwargs):
+    @extend_schema(
+        responses=inline_serializer(
+            name="ResumeAnalysisStart",
+            fields={
+                "task_id": serializers.CharField(),
+                "message": serializers.CharField(),
+            },
+        )
+    )
+    def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         resume_file = serializer.validated_data['resume']
         job_id = self.kwargs.get("job_id")
 
-        task = analyze_resume_task.delay(job_id, resume_file)
+        resume_content = extract_text_from_pdf(resume_file)
+        if not resume_content or resume_content.startswith("Error:"):
+            raise ValidationError("Could not extract text from the PDF.")
 
-        return Response({"task_id": task.id, "message": "Análisis de CV iniciado"}, status=status.HTTP_202_ACCEPTED)
+        task = analyze_resume_task.delay(job_id, resume_content)
+
+        return Response({"task_id": task.id, "message": RESUME_ANALYSIS_STARTED_MESSAGE}, status=status.HTTP_202_ACCEPTED)
 
 class GetJobsByAgentView(generics.GenericAPIView):
     serializer_class = JobSearchInputSerializer
-    
-    async def post(self, request, *args, **kwargs):
+
+    @extend_schema(
+        responses=inline_serializer(
+            name="JobSearchStart",
+            fields={
+                "task_id": serializers.CharField(),
+                "message": serializers.CharField(),
+            },
+        )
+    )
+    def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
@@ -73,7 +94,7 @@ class GetJobsByAgentView(generics.GenericAPIView):
         
         task = process_ai_search_task.delay(user_prompt)
         
-        return Response({"task_id": task.id, "message": "Searching for jobs..."}, status=status.HTTP_202_ACCEPTED)
+        return Response({"task_id": task.id, "message": JOB_SEARCH_STARTED_MESSAGE}, status=status.HTTP_202_ACCEPTED)
 
 class GetOwnerJobPostListView(generics.ListAPIView):
     serializer_class = JobPostSerializer
@@ -84,7 +105,7 @@ class GetOwnerJobPostListView(generics.ListAPIView):
         if getattr(self, "swagger_fake_view", False):
                     return JobPost.objects.none()
         
-        return JobPost.objects.filter(posted_by=self.request.user)
+        return JobPost.objects.filter(posted_by=self.request.user).exclude(status=JobPostStatus.ARCHIVED)
 
 class JobPostRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = JobPost.objects.all()

@@ -14,7 +14,7 @@ interface ApiConfigContextType {
   setDemoMode: (enabled: boolean) => void;
   showDemoConfigUI: boolean;
   isTestingConnection: boolean;
-  testConnection: () => Promise<{ success: boolean; message: string }>;
+  testConnection: (overrideUrl?: string) => Promise<{ success: boolean; message: string }>;
 }
 
 const ApiConfigContext = createContext<ApiConfigContextType | undefined>(undefined);
@@ -25,8 +25,9 @@ export const ApiConfigProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [isTestingConnection, setIsTestingConnection] = useState<boolean>(false);
 
   const handleSetBaseUrl = (url: string) => {
-    setStoredApiBaseUrl(url);
-    setBaseUrlState(url);
+    const cleaned = url.trim().replace(/^["']|["']$/g, '').replace(/\/+$/, '');
+    setStoredApiBaseUrl(cleaned);
+    setBaseUrlState(cleaned);
   };
 
   const handleSetDemoMode = (enabled: boolean) => {
@@ -34,22 +35,34 @@ export const ApiConfigProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setDemoModeState(isDemoModeEnabled());
   };
 
-  const testConnection = async (): Promise<{ success: boolean; message: string }> => {
+  const testConnection = async (overrideUrl?: string): Promise<{ success: boolean; message: string }> => {
     setIsTestingConnection(true);
+    const rawUrl = overrideUrl !== undefined ? overrideUrl : baseUrl;
+    const targetUrl = rawUrl.trim().replace(/^["']|["']$/g, '').replace(/\/+$/, '');
     try {
-      const response = await fetch(`${baseUrl}/jobs/get-jobs-list/`, {
+      const response = await fetch(`${targetUrl}/jobs/get-jobs-list/`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
       });
       setIsTestingConnection(false);
+
+      const contentType = response.headers.get('content-type') || '';
+      // If the response is HTML, it hit the SPA web server instead of a Django REST backend
+      if (contentType.includes('text/html')) {
+        return {
+          success: false,
+          message: `The server at ${targetUrl} returned HTML (SPA fallback), not the Django REST JSON API.`
+        };
+      }
+
       if (response.ok || response.status === 401 || response.status === 403) {
-        return { success: true, message: `Connected successfully to ${baseUrl}` };
+        return { success: true, message: `Connected successfully to ${targetUrl}` };
       } else {
         return { success: false, message: `Server responded with HTTP status ${response.status}` };
       }
     } catch (err: any) {
       setIsTestingConnection(false);
-      return { success: false, message: err.message || `Could not reach ${baseUrl}` };
+      return { success: false, message: err.message || `Could not reach ${targetUrl}` };
     }
   };
 

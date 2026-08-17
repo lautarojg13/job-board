@@ -215,10 +215,18 @@ export interface ResumeAnalysisStart {
   message?: string;
 }
 
-export interface TaskStatusResponse {
+export interface ResumeAnalysisResult {
+  match_score?: number;
+  recommendations?: string[];
+  error?: string;
+  details?: string;
+  [key: string]: any;
+}
+
+export interface TaskStatusResponse<T = ResumeAnalysisResult> {
   task_id: string;
-  status: string;
-  result: any;
+  status: 'PENDING' | 'STARTED' | 'SUCCESS' | 'FAILURE' | 'REVOKED' | string;
+  result: T | null;
 }
 
 export interface JobsListQueryParams {

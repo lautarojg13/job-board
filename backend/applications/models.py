@@ -4,7 +4,6 @@ from applications.validators.resume import RESUME_VALIDATORS
 
 from users.models import CustomUser
 from jobs.models import JobPost
-from applications.querysets import ApplicationQuerySet
 from applications.choices import ApplicationStatus
 
 
@@ -25,7 +24,7 @@ class Application(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-    objects = ApplicationQuerySet.as_manager()
+    objects = models.Manager()
 
     class Meta:
         unique_together = ("applicant", "job")

@@ -60,11 +60,12 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
       {loading ? (
         <div className="flex flex-col items-center justify-center py-16 text-slate-400 space-y-3">
           <Loader2 className="w-8 h-8 animate-spin text-sky-400" />
-          <p className="text-sm">Fetching job specification...</p>
+          <h2 className="text-base font-semibold text-slate-300">Loading Job Specification...</h2>
         </div>
       ) : error ? (
-        <div className="py-12 text-center text-rose-400">
-          <p>{error}</p>
+        <div className="py-12 text-center text-rose-400 space-y-2">
+          <h2 className="text-base font-bold">Failed to Load Job</h2>
+          <p className="text-xs">{error}</p>
           <button
             onClick={onClose}
             className="mt-4 px-4 py-2 bg-slate-800 text-white text-xs font-semibold rounded-xl"

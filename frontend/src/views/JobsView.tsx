@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Briefcase } from 'lucide-react';
-import { JobPost, PublicCompany, JobsListQueryParams } from '../types';
+import { PublicCompany, JobsListQueryParams, JobPost } from '../types';
 import { apiService } from '../services/api';
 import { JobCard } from '../components/JobCard';
 import { JobSearchFilter } from '../components/JobSearchFilter';

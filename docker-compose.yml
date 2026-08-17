@@ -66,5 +66,21 @@ services:
       - ./frontend:/app
       - /app/node_modules
 
+  frontend-e2e:
+    profiles: ["e2e"]
+    build: ./frontend
+    command: npx playwright test
+    environment:
+      VITE_ENABLE_DEMO_MODE: "false"
+      E2E_API_BASE_URL: "http://backend:8000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      redis:
+        condition: service_started
+      backend:
+        condition: service_started
+
 volumes:
   mysql_data:

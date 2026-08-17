@@ -1,6 +1,8 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
+from allauth.account.models import EmailAddress
+
 from users.management.commands.seed_utils import build_seed_user, get_next_seed_username_index, SEED_USERNAME_PREFIX
 from users.models import CustomUser
 
@@ -15,7 +17,19 @@ class BaseSeedCommand(BaseCommand):
 
     def _persist_users(self, users):
         with transaction.atomic():
-            return CustomUser.objects.bulk_create(users)
+            created_users = CustomUser.objects.bulk_create(users)
+            EmailAddress.objects.bulk_create(
+                [
+                    EmailAddress(
+                        user=user,
+                        email=user.email,
+                        verified=True,
+                        primary=True,
+                    )
+                    for user in created_users
+                ]
+            )
+            return created_users
 
     def seed_workflow(self, total, role, success_message, post_save_hook=None):
         if total <= 0:
