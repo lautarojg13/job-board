@@ -238,6 +238,13 @@ CELERY_TASK_SERIALIZER = 'json'
 # Ollama
 OLLAMA_API_URL = config("OLLAMA_API_URL", default="http://localhost:11434/api/generate")
 
+# AI provider abstraction (ollama | openai | deepseek | gemini).
+# Cloud providers use the OpenAI-compatible chat-completions endpoint.
+AI_PROVIDER = config("AI_PROVIDER", default="ollama").lower()
+AI_API_KEY = config("AI_API_KEY", default="")
+AI_BASE_URL = config("AI_BASE_URL", default="")
+AI_MODEL = config("AI_MODEL", default="")
+
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = config("EMAIL_HOST")

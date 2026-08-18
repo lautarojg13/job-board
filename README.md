@@ -86,6 +86,9 @@ JWT_SIGNING_KEY=your-jwt-signing-key
 OLLAMA_MODEL_NAME=llama3.2:3b   # light default for quick start; llama3:8b for a more realistic experience
 # OLLAMA_API_URL=http://localhost:11434/api/generate   # optional; overridden to http://ollama:11434/api/generate in Docker
 
+# AI Provider
+AI_PROVIDER=ollama   # ollama (local) | openai | deepseek | gemini (cloud, OpenAI-compatible)
+
 # Email (Required for allauth verification)
 EMAIL_HOST=smtp.example.com
 EMAIL_PORT=587
@@ -119,6 +122,19 @@ The default `OLLAMA_MODEL_NAME=llama3.2:3b` (~2 GB download) is a good balance o
 | Realistic experience | `llama3:8b` | ~4.7 GB | More accurate, closer to production |
 
 To switch models, set `OLLAMA_MODEL_NAME` in `.env` and recreate the container: `docker compose up -d ollama`. The model download happens only once; the rest of the stack (backend, Celery, frontend) starts regardless, so AI endpoints simply return an error until the model is ready.
+
+### Swapping the AI Provider (Cloud)
+
+The LLM call is abstracted behind a provider layer (`backend/agents/agent_bridge.py` + `backend/agents/providers/`), so Ollama is not the only option. Set `AI_PROVIDER` in `.env` to one of:
+
+| Provider | `AI_PROVIDER` | Default model | Requires |
+| --- | --- | --- | --- |
+| Ollama (local) | `ollama` | `llama3.2:3b` | nothing extra |
+| OpenAI | `openai` | `gpt-4o-mini` | `AI_API_KEY` |
+| DeepSeek | `deepseek` | `deepseek-chat` | `AI_API_KEY` |
+| Gemini | `gemini` | `gemini-2.0-flash` | `AI_API_KEY` |
+
+All cloud providers use OpenAI-compatible chat-completions endpoints, so no code changes are needed — restart the backend after editing `.env`. `AI_BASE_URL` and `AI_MODEL` optionally override the per-provider defaults (see `backend/agents/providers/openai_compat.py`). To support a new provider, implement the `Agent.call_model` contract and register it in `PROVIDERS` (`backend/agents/providers/__init__.py`).
 
 ### Installation & Running via Docker
 1. Clone the repository and configure environment variables:
