@@ -36,7 +36,8 @@ services:
     environment:
       OLLAMA_HOST: "0.0.0.0"
     command: >
-      sh -c 'ollama pull "$$OLLAMA_MODEL_NAME" || true;
+      sh -c 'MODEL="$$OLLAMA_MODEL_NAME";
+             ollama list | grep -q "^$${MODEL} " || ollama pull "$$MODEL";
              exec ollama serve'
     healthcheck:
       test: ["CMD", "ollama", "list"]

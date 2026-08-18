@@ -37,10 +37,10 @@ The application is split into two independent services containerized via Docker 
 
 | Layer | Technologies |
 | --- | --- |
-| **Backend** | Python 3.14, Django 5.2, Django REST Framework 3.16 |
+| **Backend** | Python 3.12 (Docker) / 3.14 (local venv), Django 5.2, Django REST Framework 3.16 |
 | **Database & Broker** | MySQL 8.0 (`pymysql`), Redis 7 |
 | **Async Tasks** | Celery 5 |
-| **AI Integration** | Local Ollama service (`http://ollama:11434` in Docker, `OLLAMA_API_URL`) |
+| **AI Integration** | Local Ollama service (`http://ollama:11434/api/generate` in Docker, `OLLAMA_API_URL`) |
 | **Frontend** | React 19, TypeScript, Vite, Tailwind CSS v4 |
 | **API Documentation** | `drf-spectacular` (Swagger UI & ReDoc) |
 | **Authentication** | `dj-rest-auth`, `django-allauth`, `djangorestframework-simplejwt` |
@@ -83,8 +83,8 @@ CELERY_RESULT_BACKEND=redis://redis:6379/0
 JWT_SIGNING_KEY=your-jwt-signing-key
 
 # AI Model
-OLLAMA_MODEL_NAME=llama3
-# OLLAMA_API_URL=http://localhost:11434/api/generate   # optional; overridden to http://ollama:11434 in Docker
+OLLAMA_MODEL_NAME=llama3.2:3b   # light default for quick start; llama3:8b for a more realistic experience
+# OLLAMA_API_URL=http://localhost:11434/api/generate   # optional; overridden to http://ollama:11434/api/generate in Docker
 
 # Email (Required for allauth verification)
 EMAIL_HOST=smtp.example.com
@@ -105,8 +105,20 @@ SEED_ON_START=true
 
 ### Prerequisites
 - Docker and Docker Compose
-- **Ollama**: Runs as a Docker Compose service (`ollama`) and auto-pulls `OLLAMA_MODEL_NAME` on first start. For local (non-Docker) development, run Ollama on the host at `http://localhost:11434`.
+- **Ollama**: Runs as a Docker Compose service (`ollama`) and pulls `OLLAMA_MODEL_NAME` on first start only if it isn't already present. For local (non-Docker) development, run Ollama on the host at `http://localhost:11434`.
 - Note: Inside Docker, Ollama runs on CPU by default. To use GPU acceleration on Linux, add a `gpus: all` / device mapping to the `ollama` service in `docker-compose.yml`.
+
+### Choosing an AI Model (Ollama)
+
+The default `OLLAMA_MODEL_NAME=llama3.2:3b` (~2 GB download) is a good balance of speed and quality for testing on CPU. Swap it for a lighter or heavier model depending on your hardware and how close to the "real" experience you want to get:
+
+| Use case | Model | Download size | Notes |
+| --- | --- | --- | --- |
+| Quick start / testing | `llama3.2:3b` | ~2 GB | Fast on CPU, good JSON output |
+| Lightest | `llama3.2:1b` | ~1.3 GB | For very limited machines |
+| Realistic experience | `llama3:8b` | ~4.7 GB | More accurate, closer to production |
+
+To switch models, set `OLLAMA_MODEL_NAME` in `.env` and recreate the container: `docker compose up -d ollama`. The model download happens only once; the rest of the stack (backend, Celery, frontend) starts regardless, so AI endpoints simply return an error until the model is ready.
 
 ### Installation & Running via Docker
 1. Clone the repository and configure environment variables:
@@ -119,7 +131,7 @@ SEED_ON_START=true
    ```sh
    docker-compose up --build
    ```
-   *(On first start, `SEED_ON_START=true` automatically populates sample data, and the `ollama` service pulls `OLLAMA_MODEL_NAME`).*
+   *(When no seed data exists, `SEED_ON_START=true` populates sample data, and the `ollama` service pulls `OLLAMA_MODEL_NAME` only on first start, if not already downloaded).*
 
 3. Access the services:
    - **Frontend:** [http://localhost:3000](http://localhost:3000)
@@ -132,6 +144,8 @@ SEED_ON_START=true
 ## Testing & Management Commands
 
 You can run backend tests and management commands either using local base commands (via virtual environment) or inside the running Docker containers.
+
+> Note: the local virtual environment (`backend/env/`) is not included in the repo — create it first, e.g. `python3 -m venv backend/env && backend/env/bin/pip install -r backend/requirements.txt`.
 
 ### Backend Tests (`pytest`)
 
