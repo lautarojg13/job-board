@@ -206,8 +206,13 @@ export interface JobSearchInput {
   user_prompt: string;
 }
 
+export interface JobSearchStart {
+  task_id: string;
+  message?: string;
+}
+
 export interface ResumeAnalysisRequest {
-  resume: File | string;
+  resume: File;
 }
 
 export interface ResumeAnalysisStart {
@@ -216,8 +221,10 @@ export interface ResumeAnalysisStart {
 }
 
 export interface ResumeAnalysisResult {
-  match_score?: number;
-  recommendations?: string[];
+  match_percentage?: number;
+  matching_skills?: string[];
+  missing_skills?: string[];
+  summary?: string;
   error?: string;
   details?: string;
   [key: string]: any;

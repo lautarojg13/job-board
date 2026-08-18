@@ -124,9 +124,11 @@ export function useTaskStatus<T = ResumeAnalysisResult>(
 
         if (taskStatus === 'FAILURE' || taskStatus === 'REVOKED') {
           setIsPolling(false);
+          const raw = taskResult as any;
           const errorMsg =
-            (taskResult as any)?.error ||
-            (taskResult as any)?.details ||
+            raw?.error ||
+            raw?.details ||
+            (typeof raw === 'string' && raw) ||
             `Task ended with status: ${taskStatus}`;
           setError(errorMsg);
           return true; // Stop polling

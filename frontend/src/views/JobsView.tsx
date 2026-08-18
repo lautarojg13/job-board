@@ -25,6 +25,7 @@ export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToEmployer }) => {
 
   const [filters, setFilters] = useState<JobsListQueryParams>({});
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
+  const [aiResults, setAiResults] = useState<JobPost[] | null>(null);
 
   // Modal triggers
   const [applyJob, setApplyJob] = useState<JobPost | null>(null);
@@ -58,16 +59,11 @@ export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToEmployer }) => {
     loadData();
   }, [JSON.stringify(filters)]);
 
-  const handleAgentPromptResult = (prompt: string) => {
-    if (prompt) {
-      setFilters((prev) => ({
-        ...prev,
-        search: prompt
-      }));
-    } else {
-      setFilters({});
-    }
+  const handleAgentResults = (matchedJobs: JobPost[] | null) => {
+    setAiResults(matchedJobs);
   };
+
+  const displayedJobs = aiResults !== null ? aiResults : jobs;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -80,20 +76,26 @@ export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToEmployer }) => {
 
       {/* Optional AI Agent Prompt Search */}
       {showAiAgent && (
-        <AiAgentSearch onFilteredResults={handleAgentPromptResult} />
+        <AiAgentSearch onFilteredResults={handleAgentResults} />
       )}
 
       {/* Job Search & Filter Controls */}
       <JobSearchFilter
         filters={filters}
-        onChange={setFilters}
-        onReset={() => setFilters({})}
+        onChange={(newFilters) => {
+          setAiResults(null);
+          setFilters(newFilters);
+        }}
+        onReset={() => {
+          setAiResults(null);
+          setFilters({});
+        }}
       />
 
       {/* Job Listings List */}
       <div className="space-y-4">
         <JobsListHeader
-          totalJobs={jobs.length}
+          totalJobs={displayedJobs.length}
           loading={loading}
           onRefresh={loadData}
         />
@@ -102,17 +104,27 @@ export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToEmployer }) => {
           <LoadingState message="Querying DRF jobs API..." />
         ) : error ? (
           <ErrorState error={error} onRetry={loadData} />
-        ) : jobs.length === 0 ? (
+        ) : displayedJobs.length === 0 ? (
           <EmptyState
             icon={Briefcase}
             title="No Job Listings Found"
-            description="No jobs matched your current filter criteria. Try adjusting your search keywords, location, or salary parameters."
-            actionText="Reset Filters"
-            onAction={() => setFilters({})}
+            description={
+              aiResults !== null
+                ? 'No jobs matched your AI prompt criteria. Try refining your agent query.'
+                : 'No jobs matched your current filter criteria. Try adjusting your search keywords, location, or salary parameters.'
+            }
+            actionText={aiResults !== null ? 'Clear AI Filter' : 'Reset Filters'}
+            onAction={() => {
+              if (aiResults !== null) {
+                setAiResults(null);
+              } else {
+                setFilters({});
+              }
+            }}
           />
         ) : (
           <div className="grid grid-cols-1 gap-3">
-            {jobs.map((job) => (
+            {displayedJobs.map((job) => (
               <JobCard
                 key={job.id}
                 job={job}

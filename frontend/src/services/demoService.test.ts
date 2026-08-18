@@ -48,12 +48,21 @@ describe('demoService - Mock Engine & Shape Verification', () => {
     expect(Array.isArray(applications)).toBe(true);
   });
 
-  it('GET /jobs/task-status/{id}/ -> returns { task_id, status, result }', () => {
+  it('GET /jobs/task-status/{id}/ -> returns { task_id, status, result } for resume analysis', () => {
     const taskStatus = handleMockRequest<TaskStatusResponse>('/jobs/task-status/mock-task-99/', { method: 'GET' });
     expect(taskStatus.task_id).toBe('mock-task-99');
     expect(taskStatus.status).toBe('SUCCESS');
     expect(taskStatus.result).toBeDefined();
-    expect(taskStatus.result?.match_score).toBe(92);
+    expect(taskStatus.result?.match_percentage).toBe(92);
+    expect(taskStatus.result?.matching_skills).toContain('React');
+  });
+
+  it('GET /jobs/task-status/{id}/ -> returns { task_id, status, result } with jobs for task_search_*', () => {
+    const taskStatus = handleMockRequest<TaskStatusResponse<JobPost[]>>('/jobs/task-status/task_search_999/', { method: 'GET' });
+    expect(taskStatus.task_id).toBe('task_search_999');
+    expect(taskStatus.status).toBe('SUCCESS');
+    expect(Array.isArray(taskStatus.result)).toBe(true);
+    expect(taskStatus.result?.length).toBeGreaterThan(0);
   });
 
   it('Unhandled mock route throws Unhandled mock route error', () => {

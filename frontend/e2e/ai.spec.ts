@@ -55,7 +55,7 @@ test.describe('AI Powered Features & Async Celery Tasks', () => {
     await expect(page.locator('text=/Task ID:/i')).toBeVisible({ timeout: 10000 });
 
     // Wait for task completion or evaluation score
-    const resultScore = page.locator('text=/Match Score|Task Completed|SUCCESS/i').first();
+    const resultScore = page.locator('text=/Match Percentage|Match Score|Task Completed|SUCCESS/i').first();
     await expect(resultScore).toBeVisible({ timeout: 30000 });
   });
 });

@@ -250,8 +250,7 @@ describe('apiService - Contract & Endpoint Routing', () => {
       );
     });
 
-    it('getResumeAnalysis -> POST /jobs/get_resume_analysis/{id}/ (File -> FormData, string -> JSON)', async () => {
-      // File branch
+    it('getResumeAnalysis -> POST /jobs/get_resume_analysis/{id}/ (File -> FormData)', async () => {
       const sampleFile = new File(['sample content'], 'resume.pdf', { type: 'application/pdf' });
       await apiService.getResumeAnalysis(10, sampleFile);
       expect(djangoFetch).toHaveBeenCalledWith(
@@ -259,16 +258,6 @@ describe('apiService - Contract & Endpoint Routing', () => {
         expect.objectContaining({
           method: 'POST',
           body: expect.any(FormData)
-        })
-      );
-
-      // String URL branch
-      await apiService.getResumeAnalysis(10, 'https://example.com/cv.pdf');
-      expect(djangoFetch).toHaveBeenCalledWith(
-        '/jobs/get_resume_analysis/10/',
-        expect.objectContaining({
-          method: 'POST',
-          body: JSON.stringify({ resume: 'https://example.com/cv.pdf' })
         })
       );
     });

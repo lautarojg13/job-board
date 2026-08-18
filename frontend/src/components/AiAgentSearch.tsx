@@ -1,16 +1,28 @@
-import React, { useState } from 'react';
-import { Sparkles, Send, Loader2, Search, ArrowRight, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Sparkles, Send, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { apiService } from '../services/api';
+import { JobPost } from '../types';
+import { useTaskStatus } from '../hooks/useTaskStatus';
 
 interface AiAgentSearchProps {
-  onFilteredResults: (prompt: string) => void;
+  onFilteredResults: (jobs: JobPost[] | null, prompt?: string) => void;
 }
 
 export const AiAgentSearch: React.FC<AiAgentSearchProps> = ({ onFilteredResults }) => {
   const [prompt, setPrompt] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [submittedPrompt, setSubmittedPrompt] = useState<string | null>(null);
+  const [taskId, setTaskId] = useState<string | null>(null);
+
+  const {
+    status,
+    result,
+    error: taskError,
+    isPolling,
+    timedOut,
+    reset: resetTaskPolling
+  } = useTaskStatus<JobPost[]>(taskId);
 
   const samplePrompts = [
     'Find remote full stack engineer jobs with salary over $140,000',
@@ -18,26 +30,52 @@ export const AiAgentSearch: React.FC<AiAgentSearchProps> = ({ onFilteredResults 
     'Looking for part-time frontend or documentation specialist roles'
   ];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  const triggerSearch = async (promptText: string) => {
+    setSubmitError(null);
+    resetTaskPolling();
+    setTaskId(null);
 
-    if (prompt.trim().length < 5) {
-      setError('Search prompt must be at least 5 characters long.');
+    if (promptText.trim().length < 5) {
+      setSubmitError('Search prompt must be at least 5 characters long.');
       return;
     }
 
-    setIsLoading(true);
+    setIsSubmitting(true);
     try {
-      await apiService.getJobsByAgent({ user_prompt: prompt });
-      setSubmittedPrompt(prompt);
-      onFilteredResults(prompt);
+      const res = await apiService.getJobsByAgent({ user_prompt: promptText });
+      setSubmittedPrompt(promptText);
+      if (res.task_id) {
+        setTaskId(res.task_id);
+      }
     } catch (err: any) {
-      setError(err.message || 'Failed to query AI job agent.');
+      setSubmitError(err.message || 'Failed to query AI job agent.');
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await triggerSearch(prompt);
+  };
+
+  useEffect(() => {
+    if (status === 'SUCCESS' && Array.isArray(result)) {
+      onFilteredResults(result, submittedPrompt || prompt);
+    }
+  }, [status, result]);
+
+  const handleReset = () => {
+    resetTaskPolling();
+    setTaskId(null);
+    setSubmittedPrompt(null);
+    setPrompt('');
+    setSubmitError(null);
+    onFilteredResults(null);
+  };
+
+  const activeError = submitError || taskError;
+  const isBusy = isSubmitting || isPolling;
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 text-slate-100 shadow-2xl space-y-6">
@@ -59,20 +97,39 @@ export const AiAgentSearch: React.FC<AiAgentSearchProps> = ({ onFilteredResults 
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             rows={3}
+            disabled={isBusy}
             placeholder="e.g., 'I want a senior remote React role paying over $150k with strong engineering culture...'"
-            className="w-full p-4 pr-12 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500 transition-colors"
+            className="w-full p-4 pr-12 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500 transition-colors disabled:opacity-50"
           />
           <button
             type="submit"
-            disabled={isLoading || prompt.trim().length < 5}
-            className="absolute right-3 bottom-3 p-2.5 rounded-lg bg-sky-500 hover:bg-sky-400 disabled:bg-slate-800 text-slate-950 disabled:text-slate-600 font-bold transition-colors shadow-md"
+            disabled={isBusy || prompt.trim().length < 5}
+            className="absolute right-3 bottom-3 p-2.5 rounded-lg bg-sky-500 hover:bg-sky-400 disabled:bg-slate-800 text-slate-950 disabled:text-slate-600 font-bold transition-colors shadow-md cursor-pointer disabled:cursor-not-allowed"
           >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+            {isBusy ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
           </button>
         </div>
 
-        {error && (
-          <p className="text-xs text-rose-400">{error}</p>
+        {activeError && (
+          <div className="p-3 rounded-lg bg-rose-950/30 border border-rose-500/30 text-rose-300 text-xs flex items-start space-x-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
+            <div className="space-y-1">
+              <span className="font-semibold">{activeError}</span>
+              {timedOut && (
+                <p className="text-rose-300/80 text-[11px]">
+                  The Celery background worker is taking longer than expected to process your agent search.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Polling Spinner Box */}
+        {isPolling && (
+          <div className="p-3 bg-slate-950 rounded-lg border border-slate-800/80 flex items-center space-x-3 text-slate-300 text-xs">
+            <Loader2 className="w-4 h-4 animate-spin text-sky-400 shrink-0" />
+            <p>Processing with AI Worker — matching relevant listings for your prompt...</p>
+          </div>
         )}
 
         {/* Sample Prompt Pills */}
@@ -83,11 +140,12 @@ export const AiAgentSearch: React.FC<AiAgentSearchProps> = ({ onFilteredResults 
               <button
                 key={idx}
                 type="button"
+                disabled={isBusy}
                 onClick={() => {
                   setPrompt(sp);
-                  onFilteredResults(sp);
+                  triggerSearch(sp);
                 }}
-                className="text-xs px-3 py-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white transition-colors text-left"
+                className="text-xs px-3 py-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white transition-colors text-left disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
               >
                 "{sp}"
               </button>
@@ -96,19 +154,15 @@ export const AiAgentSearch: React.FC<AiAgentSearchProps> = ({ onFilteredResults 
         </div>
       </form>
 
-      {submittedPrompt && (
+      {submittedPrompt && status === 'SUCCESS' && (
         <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs flex items-center justify-between">
           <div className="flex items-center space-x-2 text-sky-400">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>Agent filter applied: <strong className="text-white">"{submittedPrompt}"</strong></span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>AI matched listings for: <strong className="text-white">"{submittedPrompt}"</strong></span>
           </div>
           <button
-            onClick={() => {
-              setSubmittedPrompt(null);
-              setPrompt('');
-              onFilteredResults('');
-            }}
-            className="text-slate-400 hover:text-white underline text-[11px]"
+            onClick={handleReset}
+            className="text-slate-400 hover:text-white underline text-[11px] cursor-pointer ml-2"
           >
             Reset Agent Filter
           </button>

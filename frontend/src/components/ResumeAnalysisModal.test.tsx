@@ -40,14 +40,14 @@ describe('ResumeAnalysisModal Component', () => {
     vi.clearAllMocks();
   });
 
-  it('renders error message when submitting without resume file or URL', async () => {
+  it('renders error message when submitting without resume file', async () => {
     const user = userEvent.setup();
     render(<ResumeAnalysisModal job={sampleJob} onClose={mockOnClose} />);
 
     const submitBtn = screen.getByRole('button', { name: /Run Match Analysis/i });
     await user.click(submitBtn);
 
-    expect(screen.getByText(/Please select or enter a resume document/i)).toBeInTheDocument();
+    expect(screen.getByText(/Please select a resume PDF file/i)).toBeInTheDocument();
     expect(apiService.getResumeAnalysis).not.toHaveBeenCalled();
   });
 
@@ -77,7 +77,7 @@ describe('ResumeAnalysisModal Component', () => {
     expect(screen.getByText(/Resume analysis task initiated/i)).toBeInTheDocument();
   });
 
-  it('displays analysis match score and recommendations on SUCCESS task status', async () => {
+  it('displays analysis match percentage, skills, and summary on SUCCESS task status', async () => {
     const user = userEvent.setup();
     vi.mocked(apiService.getResumeAnalysis).mockResolvedValueOnce({
       task_id: 'celery-task-1234',
@@ -88,11 +88,10 @@ describe('ResumeAnalysisModal Component', () => {
     vi.spyOn(taskStatusHook, 'useTaskStatus').mockReturnValue({
       status: 'SUCCESS',
       result: {
-        match_score: 95,
-        recommendations: [
-          'Strong TypeScript profile.',
-          'Experience with Celery and DRF aligns well.'
-        ]
+        match_percentage: 95,
+        matching_skills: ['TypeScript', 'React'],
+        missing_skills: ['Docker'],
+        summary: 'Strong overall match for the role.'
       },
       error: null,
       isPolling: false,
@@ -103,7 +102,7 @@ describe('ResumeAnalysisModal Component', () => {
 
     render(<ResumeAnalysisModal job={sampleJob} onClose={mockOnClose} />);
 
-    const file = new File(['dummy'], 'cv.pdf');
+    const file = new File(['dummy'], 'cv.pdf', { type: 'application/pdf' });
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     fireEvent.change(fileInput, { target: { files: [file] } });
 
@@ -112,8 +111,9 @@ describe('ResumeAnalysisModal Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('95%')).toBeInTheDocument();
-      expect(screen.getByText(/Strong TypeScript profile/i)).toBeInTheDocument();
-      expect(screen.getByText(/Experience with Celery and DRF aligns well/i)).toBeInTheDocument();
+      expect(screen.getByText('TypeScript')).toBeInTheDocument();
+      expect(screen.getByText('Docker')).toBeInTheDocument();
+      expect(screen.getByText(/Strong overall match for the role/i)).toBeInTheDocument();
     });
   });
 });

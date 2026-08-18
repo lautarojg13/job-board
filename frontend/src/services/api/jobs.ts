@@ -4,6 +4,7 @@ import {
   JobPostCreate,
   PatchedJobPostRequest,
   JobSearchInputRequest,
+  JobSearchStart,
   ResumeAnalysisStart,
   ResumeAnalysisResult,
   TaskStatusResponse,
@@ -36,19 +37,15 @@ export const jobsApi = {
     apiFetch<void>(`/jobs/delete-job-post/${id}/`, { method: 'DELETE' }),
 
   getJobsByAgent: (data: JobSearchInputRequest) =>
-    apiFetch<any>('/jobs/get_jobs_by_agent/', jsonRequest('POST', data)),
+    apiFetch<JobSearchStart>('/jobs/get_jobs_by_agent/', jsonRequest('POST', data)),
 
-  getResumeAnalysis: (job_id: number, resume: File | string) => {
-    if (resume instanceof File) {
-      const formData = new FormData();
-      formData.append('resume', resume);
-      return apiFetch<ResumeAnalysisStart>(`/jobs/get_resume_analysis/${job_id}/`, {
-        method: 'POST',
-        body: formData
-      });
-    }
-
-    return apiFetch<ResumeAnalysisStart>(`/jobs/get_resume_analysis/${job_id}/`, jsonRequest('POST', { resume }));
+  getResumeAnalysis: (job_id: number, resume: File) => {
+    const formData = new FormData();
+    formData.append('resume', resume);
+    return apiFetch<ResumeAnalysisStart>(`/jobs/get_resume_analysis/${job_id}/`, {
+      method: 'POST',
+      body: formData
+    });
   },
 
   getTaskStatus: <T = ResumeAnalysisResult>(task_id: string) =>

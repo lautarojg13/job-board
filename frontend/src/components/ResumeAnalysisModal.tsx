@@ -12,7 +12,6 @@ interface ResumeAnalysisModalProps {
 
 export const ResumeAnalysisModal: React.FC<ResumeAnalysisModalProps> = ({ job, onClose }) => {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
-  const [resumeUrl, setResumeUrl] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [taskId, setTaskId] = useState<string | null>(null);
@@ -32,7 +31,6 @@ export const ResumeAnalysisModal: React.FC<ResumeAnalysisModalProps> = ({ job, o
     setTaskId(null);
     setAnalysisStart(null);
     setResumeFile(null);
-    setResumeUrl('');
     setSubmitError(null);
     setIsSubmitting(false);
     onClose();
@@ -46,15 +44,14 @@ export const ResumeAnalysisModal: React.FC<ResumeAnalysisModalProps> = ({ job, o
     setTaskId(null);
     setAnalysisStart(null);
 
-    const resumeInput = resumeFile || resumeUrl;
-    if (!resumeInput) {
-      setSubmitError('Please select or enter a resume document.');
+    if (!resumeFile) {
+      setSubmitError('Please select a resume PDF file.');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const res = await apiService.getResumeAnalysis(job.id, resumeInput);
+      const res = await apiService.getResumeAnalysis(job.id, resumeFile);
       setAnalysisStart(res);
       if (res.task_id) {
         setTaskId(res.task_id);
@@ -116,7 +113,7 @@ export const ResumeAnalysisModal: React.FC<ResumeAnalysisModalProps> = ({ job, o
               <div className="border border-dashed border-slate-800 hover:border-sky-500/50 rounded-xl p-4 text-center bg-slate-900/60 transition-colors cursor-pointer relative">
                 <input
                   type="file"
-                  accept=".pdf,.doc,.docx"
+                  accept=".pdf"
                   disabled={isBusy}
                   onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
                   className="absolute inset-0 opacity-0 cursor-pointer w-full h-full disabled:cursor-not-allowed"
@@ -127,24 +124,11 @@ export const ResumeAnalysisModal: React.FC<ResumeAnalysisModalProps> = ({ job, o
                     {resumeFile ? (
                       <span className="font-bold text-sky-300">{resumeFile.name}</span>
                     ) : (
-                      'Select PDF or Word Document'
+                      'Select PDF Document (PDF only)'
                     )}
                   </p>
                 </div>
               </div>
-            </div>
-
-            <div className="text-center text-xs text-slate-500 font-bold">OR</div>
-
-            <div>
-              <input
-                type="url"
-                value={resumeUrl}
-                disabled={isBusy}
-                onChange={(e) => setResumeUrl(e.target.value)}
-                placeholder="Or enter Resume URL (https://...)"
-                className="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500 disabled:opacity-50"
-              />
             </div>
 
             <button
@@ -234,36 +218,69 @@ export const ResumeAnalysisModal: React.FC<ResumeAnalysisModalProps> = ({ job, o
               {/* Task Result Box */}
               {status === 'SUCCESS' && result && (
                 <div className="space-y-3 pt-2">
-                  {/* Match Score Card */}
-                  <div className={`p-4 rounded-lg border ${getScoreBg(result.match_score)} flex items-center justify-between`}>
+                  {/* Match Percentage Card */}
+                  <div className={`p-4 rounded-lg border ${getScoreBg(result.match_percentage)} flex items-center justify-between`}>
                     <div>
-                      <span className="text-slate-400 text-[11px] font-medium block">Role Compatibility Score</span>
+                      <span className="text-slate-400 text-[11px] font-medium block">Match Percentage</span>
                       <span className="text-xs text-slate-300">Evaluation against job requirements</span>
                     </div>
                     <div className="text-right">
-                      <span className={`text-2xl font-black font-mono ${getScoreColor(result.match_score)}`}>
-                        {result.match_score !== undefined && result.match_score !== null
-                          ? `${result.match_score}%`
+                      <span className={`text-2xl font-black font-mono ${getScoreColor(result.match_percentage)}`}>
+                        {result.match_percentage !== undefined && result.match_percentage !== null
+                          ? `${result.match_percentage}%`
                           : '—'}
                       </span>
                     </div>
                   </div>
 
-                  {/* Recommendations */}
-                  {Array.isArray(result.recommendations) && result.recommendations.length > 0 && (
-                    <div className="p-3.5 bg-slate-950 rounded-lg border border-slate-800 space-y-2">
+                  {/* Summary */}
+                  {result.summary && (
+                    <div className="p-3.5 bg-slate-950 rounded-lg border border-slate-800 space-y-1.5">
                       <div className="flex items-center space-x-1.5 text-slate-300 font-bold text-xs">
                         <ListChecks className="w-4 h-4 text-sky-400" />
-                        <span>Recommendations & Key Insights</span>
+                        <span>Summary</span>
                       </div>
-                      <ul className="space-y-1.5 pl-1">
-                        {result.recommendations.map((rec, idx) => (
-                          <li key={idx} className="text-xs text-slate-300 flex items-start space-x-2">
-                            <span className="text-sky-400 font-bold select-none leading-none mt-1">•</span>
-                            <span className="leading-relaxed">{rec}</span>
-                          </li>
+                      <p className="text-xs text-slate-300 leading-relaxed pl-1">{result.summary}</p>
+                    </div>
+                  )}
+
+                  {/* Matching Skills */}
+                  {Array.isArray(result.matching_skills) && result.matching_skills.length > 0 && (
+                    <div className="p-3.5 bg-slate-950 rounded-lg border border-slate-800 space-y-2">
+                      <div className="flex items-center space-x-1.5 text-emerald-400 font-bold text-xs">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Matching Skills</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 pl-1">
+                        {result.matching_skills.map((skill, idx) => (
+                          <span
+                            key={idx}
+                            className="px-2.5 py-1 rounded-md bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs font-medium"
+                          >
+                            {skill}
+                          </span>
                         ))}
-                      </ul>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Missing Skills */}
+                  {Array.isArray(result.missing_skills) && result.missing_skills.length > 0 && (
+                    <div className="p-3.5 bg-slate-950 rounded-lg border border-slate-800 space-y-2">
+                      <div className="flex items-center space-x-1.5 text-amber-400 font-bold text-xs">
+                        <AlertCircle className="w-4 h-4" />
+                        <span>Missing Skills</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 pl-1">
+                        {result.missing_skills.map((skill, idx) => (
+                          <span
+                            key={idx}
+                            className="px-2.5 py-1 rounded-md bg-amber-950/40 border border-amber-500/30 text-amber-300 text-xs font-medium"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

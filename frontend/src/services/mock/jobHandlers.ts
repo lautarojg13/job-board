@@ -121,11 +121,11 @@ export function handleJobMock(ctx: MockRequestContext): MockHandlerResult {
 
   // AI Agent Search
   if (path === '/jobs/get_jobs_by_agent/' && method === 'POST') {
-    const body = JSON.parse((options.body as string) || '{}');
     return {
       matched: true,
       data: {
-        user_prompt: body.user_prompt || ''
+        task_id: `task_search_${Date.now()}`,
+        message: 'Searching for jobs matching your prompt...'
       }
     };
   }
