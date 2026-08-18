@@ -1,4 +1,7 @@
-from agents.serializers.output_serializers import JobParamsResponseSerializer
+from agents.serializers.output_serializers import (
+    JobParamsResponseSerializer,
+    ResumeAnalysisResultSerializer,
+)
 
 from jobs.choices import EmploymentTypes, WorkModeChoices
 
@@ -70,6 +73,61 @@ class TestJobParamsResponseSerializer:
     def test_empty_technologies_is_valid(self):
         serializer = JobParamsResponseSerializer(
             data={"technologies": []}
+        )
+
+        assert serializer.is_valid(), serializer.errors
+
+
+class TestResumeAnalysisResultSerializer:
+    def test_valid_complete_data(self):
+        serializer = ResumeAnalysisResultSerializer(
+            data={
+                "match_percentage": 80,
+                "matching_skills": ["Python", "Django"],
+                "missing_skills": ["AWS"],
+                "summary": "Good match for the role",
+            }
+        )
+
+        assert serializer.is_valid(), serializer.errors
+        assert serializer.validated_data["match_percentage"] == 80
+
+    def test_defaults_when_fields_missing(self):
+        serializer = ResumeAnalysisResultSerializer(data={})
+
+        assert serializer.is_valid(), serializer.errors
+        assert serializer.validated_data["match_percentage"] == 0
+        assert serializer.validated_data["matching_skills"] == []
+        assert serializer.validated_data["missing_skills"] == []
+        assert serializer.validated_data["summary"] == ""
+
+    def test_nullable_match_percentage_defaults_to_zero(self):
+        serializer = ResumeAnalysisResultSerializer(
+            data={"match_percentage": None}
+        )
+
+        assert serializer.is_valid(), serializer.errors
+        assert serializer.validated_data["match_percentage"] == 0
+
+    def test_match_percentage_above_100_is_invalid(self):
+        serializer = ResumeAnalysisResultSerializer(
+            data={"match_percentage": 101}
+        )
+
+        assert not serializer.is_valid()
+        assert "match_percentage" in serializer.errors
+
+    def test_match_percentage_negative_is_invalid(self):
+        serializer = ResumeAnalysisResultSerializer(
+            data={"match_percentage": -5}
+        )
+
+        assert not serializer.is_valid()
+        assert "match_percentage" in serializer.errors
+
+    def test_blank_summary_is_valid(self):
+        serializer = ResumeAnalysisResultSerializer(
+            data={"summary": ""}
         )
 
         assert serializer.is_valid(), serializer.errors

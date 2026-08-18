@@ -19,10 +19,14 @@ class JobAssistantAgent(Agent, ABC):
             temperature=temperature,
         )
 
-    async def analyze_resume_compatibility(self, resume_content, job_post_info):
+    async def analyze_resume_compatibility(self, resume_content, job_post_info, errors=None):
         system_prompt = get_resume_analyzer_prompt(self.language)
 
         user_prompt = f"Resume Content: {resume_content}\n\nJob Description: {job_post_info}"
+
+        if errors:
+            error_feedback = f"\n\nPrevious validation errors: {errors}. Please fix them."
+            user_prompt = f"{user_prompt}{error_feedback}"
 
         return await self.call_model(system_prompt=system_prompt, user_prompt=user_prompt)
 

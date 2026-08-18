@@ -115,6 +115,26 @@ class TestResumeAnalysis:
         mock_task.delay.assert_not_called()
 
     @pytest.mark.django_db
+    @patch("jobs.views.analyze_resume_task")
+    @patch("jobs.views.extract_text_from_pdf")
+    def test_400_when_file_is_not_pdf(
+        self, mock_extract_text, mock_task, user, job
+    ):
+        client = APIClient()
+        client.force_authenticate(user=user)
+
+        url = reverse("get_resume_analysis", kwargs={"job_id": job.id})
+        response = client.post(
+            url,
+            {"resume": build_resume_file(name="resume.docx")},
+            format="multipart",
+        )
+
+        assert response.status_code == 400
+        mock_extract_text.assert_not_called()
+        mock_task.delay.assert_not_called()
+
+    @pytest.mark.django_db
     def test_unauthenticated_user_cannot_analyze(self, job):
         client = APIClient()
 

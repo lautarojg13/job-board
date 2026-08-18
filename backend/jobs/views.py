@@ -66,6 +66,9 @@ class ResumeAnalysisView(generics.GenericAPIView):
         resume_file = serializer.validated_data['resume']
         job_id = self.kwargs.get("job_id")
 
+        if not resume_file.name.endswith(".pdf"):
+            raise ValidationError("Only PDF files are supported.")
+
         resume_content = extract_text_from_pdf(resume_file)
         if not resume_content or resume_content.startswith("Error:"):
             raise ValidationError("Could not extract text from the PDF.")
