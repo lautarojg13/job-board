@@ -23,6 +23,28 @@ services:
     ports:
       - "6379:6379"
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: always
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    env_file:
+      - .env
+    environment:
+      OLLAMA_HOST: "0.0.0.0"
+    command: >
+      sh -c 'ollama pull "$$OLLAMA_MODEL_NAME" || true;
+             exec ollama serve'
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
   backend:
     build: 
       context: ./backend
@@ -35,10 +57,14 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      OLLAMA_API_URL: "http://ollama:11434/api/generate"
     depends_on:
       db:
         condition: service_healthy
       redis:
+        condition: service_started
+      ollama:
         condition: service_started
 
   celery_worker:
@@ -51,10 +77,14 @@ services:
       - ./backend:/app
     env_file:
       - .env
+    environment:
+      OLLAMA_API_URL: "http://ollama:11434/api/generate"
     depends_on:
       db:
         condition: service_healthy
       redis:
+        condition: service_started
+      ollama:
         condition: service_started
 
   frontend:
@@ -84,3 +114,4 @@ services:
 
 volumes:
   mysql_data:
+  ollama_data:

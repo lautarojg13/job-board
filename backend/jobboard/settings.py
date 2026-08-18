@@ -235,6 +235,9 @@ CELERY_RESULT_EXPIRES = 3600
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 
+# Ollama
+OLLAMA_API_URL = config("OLLAMA_API_URL", default="http://localhost:11434/api/generate")
+
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = config("EMAIL_HOST")
