@@ -56,3 +56,6 @@ playwright-report/
 *.local
 
 *.http
+
+opencode.json
+.opencode/
