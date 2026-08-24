@@ -19,6 +19,7 @@ build/
 
 # env files
 env/
+notes/
 venv/
 .env
 .env.local
