@@ -15,3 +15,6 @@ class ResumeAnalysisResultSerializer(serializers.Serializer):
     matching_skills = serializers.ListField(child=serializers.CharField(), required=False, allow_empty=True, default=list)
     missing_skills = serializers.ListField(child=serializers.CharField(), required=False, allow_empty=True, default=list)
     summary = serializers.CharField(required=False, allow_blank=True, default="")
+
+    def validate_match_percentage(self, value):
+        return 0 if value is None else value

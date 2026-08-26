@@ -19,6 +19,7 @@ build/
 
 # env files
 env/
+notes/
 venv/
 .env
 .env.local
@@ -56,3 +57,6 @@ playwright-report/
 *.local
 
 *.http
+
+opencode.json
+.opencode/

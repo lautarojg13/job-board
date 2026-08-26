@@ -9,6 +9,7 @@ A full-stack, AI-enhanced job board application built with Django REST Framework
 The application is split into two independent services containerized via Docker Compose:
 - **Backend (`/backend`)**: Django 5.2 REST API handling business logic, authentication, relational data models (MySQL), and background job processing (Celery + Redis).
 - **Frontend (`/frontend`)**: React 19 SPA (Vite + TypeScript + Tailwind CSS v4) communicating via REST endpoints, featuring a client-side Demo Mode for isolated UI development.
+  > **Developer Note:** This user interface was largely generated using Google AI Studio to rapidly deliver a functional and polished frontend. The core technical focus, architectural design, and handcrafted codebase of this project reside entirely in the backend services (Django/DRF, Celery, Redis, MySQL, Ollama, and Docker orchestration).
 
 ---
 
