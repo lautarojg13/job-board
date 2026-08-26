@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Loader2, ArrowRight } from 'lucide-react';
 import { apiService } from '../../services/api';
+import { FieldError } from '../common/FieldError';
 
 interface PasswordResetFormProps {
   onSuccess: (msg: string) => void;
@@ -18,17 +19,38 @@ export const PasswordResetForm: React.FC<PasswordResetFormProps> = ({
   onResetAlerts,
 }) => {
   const [email, setEmail] = useState<string>('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+
+  const clearFieldError = (key: string) => {
+    if (fieldErrors[key]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     onResetAlerts();
+    setFieldErrors({});
     setIsLoading(true);
 
     try {
       const res = await apiService.resetPassword({ email });
       onSuccess(res.detail || 'Password reset email sent if account exists.');
     } catch (err: any) {
-      onError(err.message || 'Failed to request password reset.');
+      if (err.fieldErrors && typeof err.fieldErrors === 'object') {
+        setFieldErrors(err.fieldErrors);
+        if (err.fieldErrors.non_field_errors) {
+          onError(err.fieldErrors.non_field_errors.join(' '));
+        } else {
+          onError(err.message || 'Failed to request password reset.');
+        }
+      } else {
+        onError(err.message || 'Failed to request password reset.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -46,11 +68,17 @@ export const PasswordResetForm: React.FC<PasswordResetFormProps> = ({
             type="email"
             required
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              clearFieldError('email');
+            }}
             placeholder="alex@example.com"
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+            className={`w-full pl-10 pr-4 py-2.5 bg-slate-900 border ${
+              fieldErrors.email ? 'border-rose-500/80 focus:ring-rose-500' : 'border-slate-800 focus:ring-sky-500'
+            } rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1`}
           />
         </div>
+        <FieldError error={fieldErrors.email} />
       </div>
 
       <button
