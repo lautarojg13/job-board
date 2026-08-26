@@ -47,8 +47,8 @@ describe('JobsView View Component', () => {
     },
     {
       id: 2,
-      title: 'Django Core Engineer',
-      description: 'Scale DRF and Celery services.',
+      title: 'Backend Core Engineer',
+      description: 'Scale microservices and cloud infrastructure.',
       company: 101,
       location: 'New York, NY',
       posted_by: 1,
@@ -85,11 +85,11 @@ describe('JobsView View Component', () => {
 
     renderJobsView();
 
-    expect(screen.getByText(/Querying DRF jobs API/i)).toBeInTheDocument();
+    expect(screen.getByText(/Fetching active job postings/i)).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getByText('Senior Frontend Architect')).toBeInTheDocument();
-      expect(screen.getByText('Django Core Engineer')).toBeInTheDocument();
+      expect(screen.getByText('Backend Core Engineer')).toBeInTheDocument();
     });
   });
 

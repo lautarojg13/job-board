@@ -51,7 +51,7 @@ async function refreshAccessToken(): Promise<string> {
 }
 
 /**
- * Executes real network HTTP requests targeting the Django REST Framework API backend.
+ * Executes real network HTTP requests targeting the REST API backend.
  */
 export async function djangoFetch<T>(
   endpoint: string,
@@ -154,7 +154,7 @@ export async function djangoFetch<T>(
     return await response.json();
   } catch (error: any) {
     if (error.message?.includes('Failed to fetch') || error.name === 'TypeError') {
-      throw new Error(`Unable to connect to Django API server at ${baseUrl}. Verify server is running or enable Demo Mode.`);
+      throw new Error(`Unable to connect to API server at ${baseUrl}. Verify server is running or enable Demo Mode.`);
     }
     throw error;
   }
