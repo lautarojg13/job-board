@@ -12,7 +12,7 @@ class JobPostFactory(DjangoModelFactory):
         model = JobPost
         skip_postgeneration_save = True
     
-    title = factory.Sequence(lambda n: f'Job Title {n}')
+    title = factory.LazyFunction(JobTitleGenerator.generate)
     description = factory.Faker('paragraph')
     location = factory.Faker('city')
     status = JobPostStatus.ACTIVE
