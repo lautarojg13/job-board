@@ -27,18 +27,18 @@ export const UserActions: React.FC<UserActionsProps> = ({
       {/* Theme Switcher Toggle Button */}
       <button
         onClick={toggleTheme}
-        title={theme === 'dark' ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Nocturno'}
+        title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
         className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs transition-colors flex items-center space-x-1.5 text-slate-300"
       >
         {theme === 'dark' ? (
           <>
             <Moon className="w-4 h-4 text-indigo-400" />
-            <span className="hidden lg:inline text-[11px] font-medium">Modo Nocturno</span>
+            <span className="hidden lg:inline text-[11px] font-medium">Dark Mode</span>
           </>
         ) : (
           <>
             <Sun className="w-4 h-4 text-amber-500" />
-            <span className="hidden lg:inline text-[11px] font-medium">Modo Claro</span>
+            <span className="hidden lg:inline text-[11px] font-medium">Light Mode</span>
           </>
         )}
       </button>

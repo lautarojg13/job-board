@@ -26,7 +26,7 @@ export const AiAgentSearch: React.FC<AiAgentSearchProps> = ({ onFilteredResults 
 
   const samplePrompts = [
     'Find remote full stack engineer jobs with salary over $140,000',
-    'Show me Python or Django architect positions in Chicago or remote',
+    'Show me Python or Cloud architect positions in Chicago or remote',
     'Looking for part-time frontend or documentation specialist roles'
   ];
 
@@ -87,7 +87,7 @@ export const AiAgentSearch: React.FC<AiAgentSearchProps> = ({ onFilteredResults 
           <h2 className="text-xl font-bold text-white">
             AI Job Match Agent
           </h2>
-          <p className="text-xs text-slate-400">Describe your ideal position in plain English to match DRF listings</p>
+          <p className="text-xs text-slate-400">Describe your ideal position in plain English to match verified job listings</p>
         </div>
       </div>
 

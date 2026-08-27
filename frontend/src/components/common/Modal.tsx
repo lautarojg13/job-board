@@ -38,7 +38,7 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   footer,
   showCloseButton = true,
-  closeOnBackdropClick = true,
+  closeOnBackdropClick = false,
   closeOnEsc = true,
   className = '',
   contentClassName = '',

@@ -79,7 +79,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       onClose={onClose}
       maxWidth="md"
       title={getTitle(mode)}
-      subtitle="Django REST Auth Security Gateway"
+      subtitle="Secure Account Gateway"
     >
       {/* Alert Messages */}
       <AuthAlert error={error} successMsg={successMsg} />

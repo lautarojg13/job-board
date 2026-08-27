@@ -51,7 +51,7 @@ async function refreshAccessToken(): Promise<string> {
 }
 
 /**
- * Executes real network HTTP requests targeting the Django REST Framework API backend.
+ * Executes real network HTTP requests targeting the REST API backend.
  */
 export async function djangoFetch<T>(
   endpoint: string,
@@ -108,7 +108,43 @@ export async function djangoFetch<T>(
       } catch {
         errorJson = { detail: errorText || `HTTP error ${response.status}` };
       }
-      throw new Error(errorJson.detail || errorJson.message || `Request failed with status ${response.status}`);
+
+      let errorMessage = `Request failed with status ${response.status}`;
+      let fieldErrors: Record<string, string[]> | undefined;
+
+      if (typeof errorJson === 'string') {
+        errorMessage = errorJson;
+      } else if (errorJson && typeof errorJson === 'object') {
+        if (typeof errorJson.detail === 'string') {
+          errorMessage = errorJson.detail;
+        } else if (typeof errorJson.message === 'string') {
+          errorMessage = errorJson.message;
+        } else if (Array.isArray(errorJson.non_field_errors)) {
+          errorMessage = errorJson.non_field_errors.join(' ');
+        } else {
+          // Format field error dictionary (e.g., { password1: ["This password is too short."] })
+          const parts: string[] = [];
+          const parsedFieldErrors: Record<string, string[]> = {};
+
+          for (const [key, val] of Object.entries(errorJson)) {
+            const errList = Array.isArray(val) ? val.map(String) : [String(val)];
+            parsedFieldErrors[key] = errList;
+            const formattedField = key.replace(/_/g, ' ');
+            parts.push(`${formattedField}: ${errList.join(' ')}`);
+          }
+
+          if (parts.length > 0) {
+            errorMessage = parts.join(' | ');
+            fieldErrors = parsedFieldErrors;
+          }
+        }
+      }
+
+      const err: any = new Error(errorMessage);
+      err.status = response.status;
+      err.fieldErrors = fieldErrors;
+      err.errorData = errorJson;
+      throw err;
     }
 
     if (response.status === 204) {
@@ -118,7 +154,7 @@ export async function djangoFetch<T>(
     return await response.json();
   } catch (error: any) {
     if (error.message?.includes('Failed to fetch') || error.name === 'TypeError') {
-      throw new Error(`Unable to connect to Django API server at ${baseUrl}. Verify server is running or enable Demo Mode.`);
+      throw new Error(`Unable to connect to API server at ${baseUrl}. Verify server is running or enable Demo Mode.`);
     }
     throw error;
   }

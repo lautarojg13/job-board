@@ -32,8 +32,8 @@ export const ApiConfigModal: React.FC<ApiConfigModalProps> = ({ isOpen, onClose 
       onClose={onClose}
       maxWidth="lg"
       icon={<Server className="w-5 h-5" />}
-      title="Django API Configuration"
-      subtitle="Configure connection settings to the Django REST Framework server"
+      title="API Connection Settings"
+      subtitle="Configure connection settings to the backend API server"
     >
       <div className="space-y-5">
         {/* Mode Switcher */}
@@ -43,7 +43,7 @@ export const ApiConfigModal: React.FC<ApiConfigModalProps> = ({ isOpen, onClose 
             <p className="text-xs text-slate-400 mt-0.5">
               {demoMode
                 ? 'Active: Local mock state handles all requests instantly.'
-                : 'Disabled: Requests target the live Django server directly.'}
+                : 'Disabled: Requests target the live API server directly.'}
             </p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
@@ -60,7 +60,7 @@ export const ApiConfigModal: React.FC<ApiConfigModalProps> = ({ isOpen, onClose 
         {/* API Base URL Field */}
         <div>
           <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-1.5">
-            Django REST Server Base URL
+            API Backend Base URL
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -100,7 +100,7 @@ export const ApiConfigModal: React.FC<ApiConfigModalProps> = ({ isOpen, onClose 
             {isTestingConnection ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin text-sky-400" />
-                <span>Pinging Django Server...</span>
+                <span>Pinging API Server...</span>
               </>
             ) : (
               <>

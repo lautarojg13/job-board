@@ -13,7 +13,7 @@ export function handleTaskMock(ctx: MockRequestContext): MockHandlerResult {
       matched: true,
       data: {
         task_id: `task_analysis_${resumeAnalysisMatch[1]}`,
-        message: 'Análisis de CV iniciado'
+        message: 'Resume analysis initiated'
       }
     };
   }

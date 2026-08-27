@@ -18,10 +18,10 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({ onSelect }) => {
             JobBoard<span className="text-sky-400">.io</span>
           </span>
           <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">
-            DRF API
+            Careers
           </span>
         </div>
-        <p className="text-[11px] text-slate-500">REST Framework Portal</p>
+        <p className="text-[11px] text-slate-400">Tech & Remote Career Portal</p>
       </div>
     </div>
   );

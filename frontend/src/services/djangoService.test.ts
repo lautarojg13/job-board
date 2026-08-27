@@ -194,7 +194,7 @@ describe('djangoService - djangoFetch', () => {
     global.fetch = mockFetch;
 
     await expect(djangoFetch('/jobs/get-jobs-list/')).rejects.toThrow(
-      /Unable to connect to Django API server at/
+      /Unable to connect to API server at/
     );
   });
 });

@@ -1,20 +1,25 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Frontend — React 19 + Vite + TypeScript + Tailwind CSS v4
 
-# Run and deploy your AI Studio app
+This is the SPA frontend for the Job Board application.
 
-This contains everything you need to run your app locally.
+## Environment Variables
 
-View your app in AI Studio: https://ai.studio/apps/c8f8e5d3-302e-4d51-9d9d-429e4f4b9233
+All environment variables are defined in the **root `.env`** file (not in this directory).
+Vite reads them via `envDir: '..'` in `vite.config.ts`.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `VITE_ENABLE_DEMO_MODE` | `"false"` | Master switch for Demo Mode. Set to `"false"` to disable mock engine and all demo UI (config modal, badge, footer link). |
+| `VITE_API_BASE_URL` | `"http://localhost:8000"` | Default Django REST API base URL. Overridable at runtime when demo mode is enabled. |
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
-
+**Prerequisites:** Node.js
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Run the app:
    `npm run dev`
+
+The frontend runs on [http://localhost:3000](http://localhost:3000) and proxies API
+requests to the Django backend on [http://localhost:8000](http://localhost:8000).
