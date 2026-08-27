@@ -101,7 +101,7 @@ export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToEmployer }) => {
         />
 
         {loading ? (
-          <LoadingState message="Querying DRF jobs API..." />
+          <LoadingState message="Fetching active job postings..." />
         ) : error ? (
           <ErrorState error={error} onRetry={loadData} />
         ) : displayedJobs.length === 0 ? (

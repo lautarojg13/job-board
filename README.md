@@ -101,6 +101,14 @@ DEFAULT_FROM_EMAIL=webmaster@localhost
 # CORS & Startup
 CORS_ALLOWED_ORIGINS=http://localhost:3000
 SEED_ON_START=true
+
+# Frontend (Vite)
+# Read by the React/Vite frontend via envDir: '..' in vite.config.ts.
+# VITE_ENABLE_DEMO_MODE: "false" disables Demo Mode and all related UI
+# (config modal, demo badge, mock engine). App hits the real Django API directly.
+# VITE_API_BASE_URL: Default API base URL for the frontend.
+VITE_ENABLE_DEMO_MODE="false"
+VITE_API_BASE_URL="http://localhost:8000"
 ```
 
 ---

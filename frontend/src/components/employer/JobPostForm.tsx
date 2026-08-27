@@ -63,7 +63,7 @@ export const JobPostForm: React.FC<JobPostFormProps> = ({
           <h2 className="text-lg font-bold">
             {editingJobId ? `Edit Job Posting #${editingJobId}` : 'Publish New Job Posting'}
           </h2>
-          <p className="text-xs text-slate-400">Endpoint: POST /jobs/post-job/ or PATCH /jobs/edit-job-post/&#123;id&#125;/</p>
+          <p className="text-xs text-slate-400">Fill out role details, compensation, and candidate requirements</p>
         </div>
       </div>
 
@@ -91,7 +91,7 @@ export const JobPostForm: React.FC<JobPostFormProps> = ({
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Senior Backend Engineer (Python/Django)"
+            placeholder="e.g. Senior Backend Engineer (Python/Cloud)"
             className="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
           />
         </div>

@@ -22,7 +22,7 @@ export const ApplicationsHeader: React.FC<ApplicationsHeaderProps> = ({
           <FileCheck className="w-6 h-6 mr-2.5 text-sky-400" />
           My Submitted Applications
         </h1>
-        <p className="text-xs text-slate-400 mt-1">Track the status of your applications via DRF REST endpoints</p>
+        <p className="text-xs text-slate-400 mt-1">Track the status of your submitted job applications</p>
       </div>
 
       {/* Status Filter */}

@@ -51,7 +51,7 @@ export const ApiConfigProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       if (contentType.includes('text/html')) {
         return {
           success: false,
-          message: `The server at ${targetUrl} returned HTML (SPA fallback), not the Django REST JSON API.`
+          message: `The server at ${targetUrl} returned HTML (SPA fallback), not a valid JSON API response.`
         };
       }
 

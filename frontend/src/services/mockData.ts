@@ -39,8 +39,8 @@ export const INITIAL_COMPANIES: PublicCompany[] = [
 export const INITIAL_JOBS: JobPost[] = [
   {
     id: 1,
-    title: 'Senior Full Stack Engineer (React & Django)',
-    description: 'We are seeking an experienced Full Stack Engineer to lead the architecture of our core web platform. You will work with React 19, TypeScript, Django REST Framework, and PostgreSQL. Key responsibilities include designing scalable APIs, optimizing database queries, and creating intuitive user interfaces.',
+    title: 'Senior Full Stack Engineer (React & Node/Python)',
+    description: 'We are seeking an experienced Full Stack Engineer to lead the architecture of our core web platform. You will work with React 19, TypeScript, REST APIs, and PostgreSQL. Key responsibilities include designing scalable APIs, optimizing database queries, and creating intuitive user interfaces.',
     company: 101,
     location: 'San Francisco, CA',
     posted_by: 1,
@@ -65,7 +65,7 @@ export const INITIAL_JOBS: JobPost[] = [
   },
   {
     id: 3,
-    title: 'Backend Python/Django Systems Architect',
+    title: 'Backend Python & Systems Architect',
     description: 'High-scale API design, Redis caching, microservices, and high-performance backend pipelines for our algorithmic financial engine.',
     company: 102,
     location: 'Chicago, IL',
@@ -112,7 +112,7 @@ export const INITIAL_APPLICATIONS: ApplicationDetail[] = [
     updated_at: new Date(Date.now() - 86400000 * 1).toISOString(),
     applicant_id: 10,
     job_id: 1,
-    cover_letter: 'I have 6 years of experience scaling Django REST APIs and building modern React frontends. Excited to join Acme Innovations!',
+    cover_letter: 'I have 6 years of experience scaling REST APIs and building modern React frontends. Excited to join Acme Innovations!',
     resume: 'https://example.com/resumes/john_doe_resume.pdf'
   },
   {
