@@ -1,9 +1,9 @@
 from django.db import models
-from .choices import JobPostStatus
+from jobs.choices import JobPostStatus
 
 class JobPostQuerySet(models.QuerySet):
     def visible(self):
-        return self.exclude(status=JobPostStatus.ARCHIVED)
+        return self.exclude(status=JobPostStatus.ARCHIVED).exclude(status=JobPostStatus.CLOSED)
 
     def filter_by_location(self, location):
         return self.filter(location__icontains=location)

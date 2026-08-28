@@ -40,7 +40,6 @@ class JobPostListView(generics.ListAPIView):
         return qs
 
 class JobPostCreateView(generics.CreateAPIView):
-    queryset = JobPost.objects.all()
     serializer_class = JobPostCreateSerializer
     permission_classes = [IsAuthenticated]
 
