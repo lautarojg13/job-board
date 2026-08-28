@@ -21,7 +21,12 @@ export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToEmployer }) => {
   const [jobs, setJobs] = useState<JobPost[]>([]);
   const [companiesMap, setCompaniesMap] = useState<Record<number, PublicCompany>>({});
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState<boolean>(false);
+  const [nextPage, setNextPage] = useState<number>(2);
+  const [totalJobs, setTotalJobs] = useState<number>(0);
+  const [requestId, setRequestId] = useState<number>(0);
 
   const [filters, setFilters] = useState<JobsListQueryParams>({});
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
@@ -37,11 +42,14 @@ export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToEmployer }) => {
     setError(null);
     try {
       const [jobsData, companiesData] = await Promise.all([
-        apiService.getJobsList(filters),
+        apiService.getJobsList({ ...filters, page: 1 }),
         apiService.getCompanies().catch(() => [])
       ]);
 
-      setJobs(jobsData);
+      setJobs(jobsData.results);
+      setTotalJobs(jobsData.count);
+      setHasMore(jobsData.next !== null);
+      setNextPage(2);
 
       const compMap: Record<number, PublicCompany> = {};
       companiesData.forEach((c) => {
@@ -57,7 +65,24 @@ export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToEmployer }) => {
 
   useEffect(() => {
     loadData();
-  }, [JSON.stringify(filters)]);
+  }, [JSON.stringify(filters), requestId]);
+
+  const loadMore = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const jobsData = await apiService.getJobsList({ ...filters, page: nextPage });
+      setJobs((prev) => [...prev, ...jobsData.results]);
+      setHasMore(jobsData.next !== null);
+      setNextPage((p) => p + 1);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load more jobs.');
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const refresh = () => setRequestId((r) => r + 1);
 
   const handleAgentResults = (matchedJobs: JobPost[] | null) => {
     setAiResults(matchedJobs);
@@ -95,9 +120,9 @@ export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToEmployer }) => {
       {/* Job Listings List */}
       <div className="space-y-4">
         <JobsListHeader
-          totalJobs={displayedJobs.length}
+          totalJobs={aiResults !== null ? displayedJobs.length : totalJobs}
           loading={loading}
-          onRefresh={loadData}
+          onRefresh={refresh}
         />
 
         {loading ? (
@@ -140,6 +165,18 @@ export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToEmployer }) => {
                 }}
               />
             ))}
+          </div>
+        )}
+
+        {aiResults === null && hasMore && !error && (
+          <div className="flex justify-center pt-4">
+            <button
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="inline-flex items-center px-5 py-2.5 text-sm font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {loadingMore ? 'Loading...' : 'Load more'}
+            </button>
           </div>
         )}
       </div>

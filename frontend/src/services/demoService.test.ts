@@ -1,19 +1,20 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { handleMockRequest, getMockState, saveMockState } from './demoService';
-import { JobPost, PublicCompany, ApplicationList, TaskStatusResponse } from '../types';
+import { JobPost, PublicCompany, ApplicationList, TaskStatusResponse, Paginated } from '../types';
 
 describe('demoService - Mock Engine & Shape Verification', () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
-  it('GET /jobs/get-jobs-list/ -> returns array of JobPost', () => {
-    const jobs = handleMockRequest<JobPost[]>('/jobs/get-jobs-list/', { method: 'GET' });
-    expect(Array.isArray(jobs)).toBe(true);
-    expect(jobs.length).toBeGreaterThan(0);
-    expect(jobs[0]).toHaveProperty('id');
-    expect(jobs[0]).toHaveProperty('title');
-    expect(jobs[0]).toHaveProperty('company');
+  it('GET /jobs/get-jobs-list/ -> returns paginated results', () => {
+    const jobs = handleMockRequest<Paginated<JobPost>>('/jobs/get-jobs-list/', { method: 'GET' });
+    expect(Array.isArray(jobs.results)).toBe(true);
+    expect(jobs.results).toHaveProperty('length');
+    expect(jobs.count).toBeGreaterThan(0);
+    expect(jobs.results[0]).toHaveProperty('id');
+    expect(jobs.results[0]).toHaveProperty('title');
+    expect(jobs.results[0]).toHaveProperty('company');
   });
 
   it('GET /jobs/get-job-details/{id}/ -> returns JobPost object', () => {

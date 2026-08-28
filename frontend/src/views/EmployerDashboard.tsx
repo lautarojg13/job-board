@@ -60,7 +60,7 @@ export const EmployerDashboard: React.FC = () => {
     setError(null);
     try {
       const [jobsData, compData] = await Promise.all([
-        apiService.getOwnerJobsList().catch(() => apiService.getJobsList()),
+        apiService.getOwnerJobsList().catch(async () => (await apiService.getJobsList()).results),
         apiService.getCompanies().catch(() => [])
       ]);
       setOwnerJobs(jobsData);

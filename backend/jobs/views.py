@@ -16,6 +16,7 @@ from jobs.choices import JobPostStatus
 from jobs.models import JobPost
 from jobs.tasks import process_ai_search_task, analyze_resume_task
 from jobs.utils.pdf_handler import extract_text_from_pdf
+from jobs.pagination import JobPostPagination
 
 from celery.result import AsyncResult
 
@@ -30,6 +31,7 @@ class JobPostListView(generics.ListAPIView):
     permission_classes = [AllowAny]
     filterset_class = JobPostFilter
     ordering_fields = ["posted_at", "salary"]
+    pagination_class = JobPostPagination
 
     def get_queryset(self):
         qs = super().get_queryset()

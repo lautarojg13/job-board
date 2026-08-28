@@ -149,6 +149,16 @@ def _get_success_response_properties(schema, path, method):
     if "$ref" in response_schema:
         response_schema = _resolve_ref(schema, response_schema["$ref"])
 
+    # Paginated responses wrap the items under `results` (DRF pagination).
+    if response_schema.get("type") == "object" and "results" in response_schema.get("properties", {}):
+        response_schema = response_schema["properties"]["results"]
+        if "$ref" in response_schema:
+            response_schema = _resolve_ref(schema, response_schema["$ref"])
+        items = response_schema.get("items", {})
+        if "$ref" in items:
+            items = _resolve_ref(schema, items["$ref"])
+        response_schema = items
+
     if response_schema.get("type") == "array":
         items = response_schema.get("items", {})
         if "$ref" in items:

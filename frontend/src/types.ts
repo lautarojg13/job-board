@@ -236,6 +236,13 @@ export interface TaskStatusResponse<T = ResumeAnalysisResult> {
   result: T | null;
 }
 
+export interface Paginated<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
 export interface JobsListQueryParams {
   company?: string;
   employment_type?: EmploymentTypeEnum;
@@ -243,6 +250,8 @@ export interface JobsListQueryParams {
   max_salary?: number;
   min_salary?: number;
   ordering?: string;
+  page?: number;
+  page_size?: number;
   search?: string;
   title?: string;
 }

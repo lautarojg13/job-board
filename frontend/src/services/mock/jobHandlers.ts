@@ -53,7 +53,22 @@ export function handleJobMock(ctx: MockRequestContext): MockHandlerResult {
       result = result.filter(j => (j.salary || 0) <= parseInt(maxSalary, 10));
     }
 
-    return { matched: true, data: result };
+    const page = parseInt(queryParams.get('page') || '1', 10);
+    const pageSize = parseInt(queryParams.get('page_size') || '10', 10);
+    const start = (page - 1) * pageSize;
+    const pageItems = result.slice(start, start + pageSize);
+    const next = start + pageSize < result.length ? String(page + 1) : null;
+    const previous = page > 1 ? String(page - 1) : null;
+
+    return {
+      matched: true,
+      data: {
+        count: result.length,
+        next,
+        previous,
+        results: pageItems
+      }
+    };
   }
 
   // Owner's Posted Jobs List

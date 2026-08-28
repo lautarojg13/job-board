@@ -7,7 +7,7 @@ import { apiService } from '../services/api';
 import { AuthProvider } from '../context/AuthContext';
 import { ApiConfigProvider } from '../context/ApiConfigContext';
 import { ThemeProvider } from '../context/ThemeContext';
-import { JobPost, PublicCompany } from '../types';
+import { JobPost, PublicCompany, Paginated } from '../types';
 
 vi.mock('../services/api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../services/api')>();
@@ -60,6 +60,13 @@ describe('JobsView View Component', () => {
     }
   ];
 
+  const paginated = (jobs: JobPost[]): Paginated<JobPost> => ({
+    count: jobs.length,
+    next: null,
+    previous: null,
+    results: jobs
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -80,7 +87,7 @@ describe('JobsView View Component', () => {
   };
 
   it('renders loading state initially and then shows jobs when loaded', async () => {
-    vi.mocked(apiService.getJobsList).mockResolvedValueOnce(sampleJobs);
+    vi.mocked(apiService.getJobsList).mockResolvedValueOnce(paginated(sampleJobs));
     vi.mocked(apiService.getCompanies).mockResolvedValueOnce(sampleCompanies);
 
     renderJobsView();
@@ -94,7 +101,7 @@ describe('JobsView View Component', () => {
   });
 
   it('shows EmptyState when no jobs are returned', async () => {
-    vi.mocked(apiService.getJobsList).mockResolvedValueOnce([]);
+    vi.mocked(apiService.getJobsList).mockResolvedValueOnce(paginated([]));
     vi.mocked(apiService.getCompanies).mockResolvedValueOnce([]);
 
     renderJobsView();
@@ -116,7 +123,7 @@ describe('JobsView View Component', () => {
     });
 
     // Mock successful retry
-    vi.mocked(apiService.getJobsList).mockResolvedValue(sampleJobs);
+    vi.mocked(apiService.getJobsList).mockResolvedValue(paginated(sampleJobs));
     const retryBtn = screen.getByRole('button', { name: /Retry|Try Again/i });
     await user.click(retryBtn);
 
@@ -126,7 +133,7 @@ describe('JobsView View Component', () => {
   });
 
   it('calls getJobsList with updated filters when search input changes', async () => {
-    vi.mocked(apiService.getJobsList).mockResolvedValue(sampleJobs);
+    vi.mocked(apiService.getJobsList).mockResolvedValue(paginated(sampleJobs));
     vi.mocked(apiService.getCompanies).mockResolvedValue(sampleCompanies);
 
     renderJobsView();
@@ -147,7 +154,7 @@ describe('JobsView View Component', () => {
 
   it('fetches job details and opens detail modal when clicking a job card', async () => {
     const user = userEvent.setup();
-    vi.mocked(apiService.getJobsList).mockResolvedValueOnce(sampleJobs);
+    vi.mocked(apiService.getJobsList).mockResolvedValueOnce(paginated(sampleJobs));
     vi.mocked(apiService.getCompanies).mockResolvedValueOnce(sampleCompanies);
     vi.mocked(apiService.getJobDetails).mockResolvedValueOnce(sampleJobs[0]);
 

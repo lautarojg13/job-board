@@ -19,7 +19,7 @@ class TestGetJobsList:
         url = reverse("get_jobs_list")
         response = client.get(url)
 
-        assert JobPost.objects.all().count() == len(response.data)
+        assert JobPost.objects.all().count() == response.data["count"]
         assert response.status_code == 200
 
 #POST TESTS
