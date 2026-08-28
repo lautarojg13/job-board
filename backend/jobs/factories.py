@@ -5,6 +5,8 @@ from jobs.choices import JobPostStatus, EmploymentTypes
 
 from users.factories import CustomUserFactory
 
+from jobs.generators import JobTitleGenerator
+
 import factory
 
 class JobPostFactory(DjangoModelFactory):
