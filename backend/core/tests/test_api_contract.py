@@ -17,8 +17,8 @@ from drf_spectacular.generators import SchemaGenerator
 
 # (path, method) pairs consumed by frontend/src/services/api/**/*.ts
 EXPECTED_ENDPOINTS = {
-    "/auth/token/": ["post"],
-    "/auth/token/blacklist/": ["post"],
+    "/auth/login/": ["post"],
+    "/auth/logout/": ["post"],
     "/auth/registration/": ["post"],
     "/auth/registration/resend-email/": ["post"],
     "/auth/registration/verify-email/": ["post"],
@@ -48,7 +48,8 @@ EXPECTED_ENDPOINTS = {
 
 # (path, method) -> required response fields, mirroring frontend/src/types.ts
 EXPECTED_RESPONSE_FIELDS = {
-    ("/auth/token/", "post"): {"access", "refresh"},
+    ("/auth/login/", "post"): {"access", "refresh"},
+    ("/auth/logout/", "post"): {"detail"},
     ("/auth/registration/", "post"): {"detail"},
     ("/auth/registration/resend-email/", "post"): {"detail"},
     ("/auth/registration/verify-email/", "post"): {"detail"},

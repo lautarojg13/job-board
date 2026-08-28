@@ -53,10 +53,10 @@ describe('apiService - Contract & Endpoint Routing', () => {
   });
 
   describe('Endpoint Contract Verification against djangoFetch', () => {
-    it('login -> POST /auth/token/', async () => {
+    it('login -> POST /auth/login/', async () => {
       await apiService.login({ username: 'dev', password: '123' });
       expect(djangoFetch).toHaveBeenCalledWith(
-        '/auth/token/',
+        '/auth/login/',
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify({ username: 'dev', password: '123' })
@@ -64,11 +64,11 @@ describe('apiService - Contract & Endpoint Routing', () => {
       );
     });
 
-    it('logout -> POST /auth/token/blacklist/', async () => {
+    it('logout -> POST /auth/logout/', async () => {
       localStorage.setItem('jobboard_refresh_token', 'sample-refresh');
       await apiService.logout();
       expect(djangoFetch).toHaveBeenCalledWith(
-        '/auth/token/blacklist/',
+        '/auth/logout/',
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify({ refresh: 'sample-refresh' })

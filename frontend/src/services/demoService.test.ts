@@ -25,8 +25,8 @@ describe('demoService - Mock Engine & Shape Verification', () => {
     expect(job.title).toBe(targetJob.title);
   });
 
-  it('POST /auth/token/ -> returns { access, refresh }', () => {
-    const res = handleMockRequest<{ access: string; refresh: string }>('/auth/token/', {
+  it('POST /auth/login/ -> returns { access, refresh }', () => {
+    const res = handleMockRequest<{ access: string; refresh: string }>('/auth/login/', {
       method: 'POST',
       body: JSON.stringify({ username: 'demo', password: 'demo-password' })
     });
@@ -73,8 +73,8 @@ describe('demoService - Mock Engine & Shape Verification', () => {
 
   describe('Sync Guard: Every frontend API route has a mock handler', () => {
     const testCases: Array<{ name: string; endpoint: string; method: string; body?: any }> = [
-      { name: 'login', endpoint: '/auth/token/', method: 'POST', body: JSON.stringify({ username: 'u', password: 'p' }) },
-      { name: 'logout', endpoint: '/auth/token/blacklist/', method: 'POST', body: JSON.stringify({ refresh: 'r' }) },
+      { name: 'login', endpoint: '/auth/login/', method: 'POST', body: JSON.stringify({ username: 'u', password: 'p' }) },
+      { name: 'logout', endpoint: '/auth/logout/', method: 'POST', body: JSON.stringify({ refresh: 'r' }) },
       { name: 'register', endpoint: '/auth/registration/', method: 'POST', body: JSON.stringify({ username: 'u', email: 'e@t.com' }) },
       { name: 'resendEmailVerification', endpoint: '/auth/registration/resend-email/', method: 'POST' },
       { name: 'verifyEmail', endpoint: '/auth/registration/verify-email/', method: 'POST' },

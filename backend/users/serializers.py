@@ -1,11 +1,8 @@
 from allauth.account.adapter import get_adapter
-from allauth.account.models import EmailAddress
 from dj_rest_auth.registration.serializers import RegisterSerializer
-from dj_rest_auth.serializers import UserDetailsSerializer
+from dj_rest_auth.serializers import LoginSerializer, UserDetailsSerializer
 from allauth.account.utils import filter_users_by_email
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from rest_framework import serializers
 
 from users.models import CustomUser
@@ -141,25 +138,6 @@ class CustomUserDetailsSerializer(UserDetailsSerializer):
 #             raise serializers.ValidationError({'refresh': 'Invalid or expired token'})
 
 
-@extend_schema_serializer(
-    examples=[
-        OpenApiExample(
-            "Token pair",
-            value={"access": "...", "refresh": "..."},
-            response_only=True,
-            status_codes=["200"],
-        ),
-    ],
-)
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    def validate(self, attrs):
-        data = super().validate(attrs)
-        user = self.user
-        email_verified = EmailAddress.objects.filter(
-            user=user, verified=True
-        ).exists()
-        if not email_verified:
-            raise serializers.ValidationError(
-                "Email not verified. Please verify your email before logging in."
-            )
-        return data
+class CustomLoginSerializer(LoginSerializer):
+    def get_auth_user_using_allauth(self, username, email, password):
+        return self._validate_username_email(username, email, password)

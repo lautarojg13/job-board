@@ -9,7 +9,7 @@ export function handleAuthMock(ctx: MockRequestContext): MockHandlerResult {
   const { path, method, options, state } = ctx;
 
   // Login: Obtain JWT access and refresh token
-  if (path === '/auth/token/' && method === 'POST') {
+  if (path === '/auth/login/' && method === 'POST') {
     const body = JSON.parse((options.body as string) || '{}');
     const inputUser = body.username || body.email;
     if (inputUser) {
@@ -34,7 +34,7 @@ export function handleAuthMock(ctx: MockRequestContext): MockHandlerResult {
   }
 
   // Logout / Blacklist token
-  if (path === '/auth/token/blacklist/' && method === 'POST') {
+  if (path === '/auth/logout/' && method === 'POST') {
     setStoredAuthToken(null);
     setStoredRefreshToken(null);
     return { matched: true, data: { detail: 'Token blacklisted.' } };
