@@ -1,13 +1,11 @@
 from drf_spectacular.utils import extend_schema, inline_serializer
 
-
 from rest_framework import serializers
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.decorators import APIView
 from rest_framework.exceptions import ValidationError
-
 
 from agents.serializers.input_serializers import ResumeAnalysisSerializer, JobSearchInputSerializer
 
@@ -21,7 +19,7 @@ from jobs.utils.pdf_handler import extract_text_from_pdf
 
 from celery.result import AsyncResult
 
-RESUME_ANALYSIS_STARTED_MESSAGE = "Análisis de CV iniciado"
+RESUME_ANALYSIS_STARTED_MESSAGE = "Resume analize Started"
 JOB_SEARCH_STARTED_MESSAGE = "Searching for jobs..."
 
 # Create your views here.
@@ -33,8 +31,12 @@ class JobPostListView(generics.ListAPIView):
     filterset_class = JobPostFilter
     ordering_fields = ["posted_at", "salary"]
 
-    ordering = ["-posted_at"]
-    
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if not self.request.query_params.get("ordering"):
+            return qs.order_by("?")
+        return qs
+
 class JobPostCreateView(generics.CreateAPIView):
     queryset = JobPost.objects.all()
     serializer_class = JobPostCreateSerializer
