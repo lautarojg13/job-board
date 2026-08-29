@@ -1,11 +1,15 @@
 import React from 'react';
 import { Building2, Plus } from 'lucide-react';
+import { useAuth } from '@/src/context/AuthContext';
 
 interface CompaniesHeaderProps {
   onRegisterClick: () => void;
 }
 
 export const CompaniesHeader: React.FC<CompaniesHeaderProps> = ({ onRegisterClick }) => {
+
+  const { isAuthenticated } = useAuth()
+
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
       <div>
@@ -16,13 +20,15 @@ export const CompaniesHeader: React.FC<CompaniesHeaderProps> = ({ onRegisterClic
         <p className="text-xs text-slate-400 mt-1">Browse participating employers or register a new corporate profile</p>
       </div>
 
-      <button
+      { isAuthenticated && (
+        <button
         onClick={onRegisterClick}
         className="px-4 py-2.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold flex items-center space-x-2 transition-colors shrink-0"
       >
         <Plus className="w-4 h-4" />
         <span>Register Company</span>
       </button>
+      ) }
     </div>
   );
 };
