@@ -24,7 +24,6 @@ vi.mock('../services/api', async (importOriginal) => {
 });
 
 describe('JobsView View Component', () => {
-  const mockNavigateToEmployer = vi.fn();
   const mockNavigateToCompanies = vi.fn();
 
   const sampleCompanies: PublicCompany[] = [
@@ -77,7 +76,6 @@ describe('JobsView View Component', () => {
         <ApiConfigProvider>
           <AuthProvider>
             <JobsView
-              onNavigateToEmployer={mockNavigateToEmployer}
               onNavigateToCompanies={mockNavigateToCompanies}
             />
           </AuthProvider>

@@ -7,17 +7,15 @@ import { JobSearchFilter } from '../components/JobSearchFilter';
 import { JobDetailModal } from '../components/JobDetailModal';
 import { ApplyModal } from '../components/ApplyModal';
 import { ResumeAnalysisModal } from '../components/ResumeAnalysisModal';
-import { AiAgentSearch } from '../components/AiAgentSearch';
 import { JobsHeroHeader } from '../components/jobs/JobsHeroHeader';
 import { JobsListHeader } from '../components/jobs/JobsListHeader';
 import { LoadingState, ErrorState, EmptyState } from '../components/common/StateMessage';
 
 interface JobsViewProps {
-  onNavigateToEmployer: () => void;
   onNavigateToCompanies: () => void;
 }
 
-export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToEmployer }) => {
+export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToCompanies }) => {
   const [jobs, setJobs] = useState<JobPost[]>([]);
   const [companiesMap, setCompaniesMap] = useState<Record<number, PublicCompany>>({});
   const [loading, setLoading] = useState<boolean>(true);
@@ -30,12 +28,10 @@ export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToEmployer }) => {
 
   const [filters, setFilters] = useState<JobsListQueryParams>({});
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
-  const [aiResults, setAiResults] = useState<JobPost[] | null>(null);
 
   // Modal triggers
   const [applyJob, setApplyJob] = useState<JobPost | null>(null);
   const [analyzeJob, setAnalyzeJob] = useState<JobPost | null>(null);
-  const [showAiAgent, setShowAiAgent] = useState<boolean>(false);
 
   const loadData = async () => {
     setLoading(true);
@@ -84,43 +80,22 @@ export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToEmployer }) => {
 
   const refresh = () => setRequestId((r) => r + 1);
 
-  const handleAgentResults = (matchedJobs: JobPost[] | null) => {
-    setAiResults(matchedJobs);
-  };
-
-  const displayedJobs = aiResults !== null ? aiResults : jobs;
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Hero Header */}
-      <JobsHeroHeader
-        showAiAgent={showAiAgent}
-        onToggleAiAgent={() => setShowAiAgent(!showAiAgent)}
-        onNavigateToEmployer={onNavigateToEmployer}
-      />
-
-      {/* Optional AI Agent Prompt Search */}
-      {showAiAgent && (
-        <AiAgentSearch onFilteredResults={handleAgentResults} />
-      )}
+      <JobsHeroHeader />
 
       {/* Job Search & Filter Controls */}
       <JobSearchFilter
         filters={filters}
-        onChange={(newFilters) => {
-          setAiResults(null);
-          setFilters(newFilters);
-        }}
-        onReset={() => {
-          setAiResults(null);
-          setFilters({});
-        }}
+        onChange={(newFilters) => setFilters(newFilters)}
+        onReset={() => setFilters({})}
       />
 
       {/* Job Listings List */}
       <div className="space-y-4">
         <JobsListHeader
-          totalJobs={aiResults !== null ? displayedJobs.length : totalJobs}
+          totalJobs={totalJobs}
           loading={loading}
           onRefresh={refresh}
         />
@@ -129,27 +104,17 @@ export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToEmployer }) => {
           <LoadingState message="Fetching active job postings..." />
         ) : error ? (
           <ErrorState error={error} onRetry={loadData} />
-        ) : displayedJobs.length === 0 ? (
+        ) : jobs.length === 0 ? (
           <EmptyState
             icon={Briefcase}
             title="No Job Listings Found"
-            description={
-              aiResults !== null
-                ? 'No jobs matched your AI prompt criteria. Try refining your agent query.'
-                : 'No jobs matched your current filter criteria. Try adjusting your search keywords, location, or salary parameters.'
-            }
-            actionText={aiResults !== null ? 'Clear AI Filter' : 'Reset Filters'}
-            onAction={() => {
-              if (aiResults !== null) {
-                setAiResults(null);
-              } else {
-                setFilters({});
-              }
-            }}
+            description="No jobs matched your current filter criteria. Try adjusting your search keywords, location, or salary parameters."
+            actionText="Reset Filters"
+            onAction={() => setFilters({})}
           />
         ) : (
           <div className="grid grid-cols-1 gap-3">
-            {displayedJobs.map((job) => (
+            {jobs.map((job) => (
               <JobCard
                 key={job.id}
                 job={job}
@@ -168,7 +133,7 @@ export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToEmployer }) => {
           </div>
         )}
 
-        {aiResults === null && hasMore && !error && (
+        {hasMore && !error && (
           <div className="flex justify-center pt-4">
             <button
               onClick={loadMore}

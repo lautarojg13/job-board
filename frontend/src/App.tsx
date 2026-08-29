@@ -8,6 +8,7 @@ import { ApiConfigModal } from './components/ApiConfigModal';
 import { AuthModal, AuthMode } from './components/AuthModal';
 import { RequireAuth } from './components/auth/RequireAuth';
 import { JobsView } from './views/JobsView';
+import { AiAgentView } from './views/AiAgentView';
 import { ApplicationsView } from './views/ApplicationsView';
 import { EmployerDashboard } from './views/EmployerDashboard';
 import { CompaniesView } from './views/CompaniesView';
@@ -38,13 +39,13 @@ function MainApp() {
   const renderActiveView = () => {
     switch (activeTab) {
       case 'jobs':
-      case 'ai-match':
         return (
           <JobsView
-            onNavigateToEmployer={() => setActiveTab('employer')}
             onNavigateToCompanies={() => setActiveTab('companies')}
           />
         );
+      case 'ai-match':
+        return <AiAgentView />;
       case 'applications':
         return (
           <RequireAuth redirectTo="applications" onOpenAuthModal={handleOpenAuthModal}>
@@ -68,7 +69,6 @@ function MainApp() {
       default:
         return (
           <JobsView
-            onNavigateToEmployer={() => setActiveTab('employer')}
             onNavigateToCompanies={() => setActiveTab('companies')}
           />
         );
