@@ -1,6 +1,6 @@
 from django.db import models
 from users.models import CustomUser
-from .choices import CompanyRoleChoices
+from companies.choices import CompanyRoleChoices
 
 # Create your models here.
 

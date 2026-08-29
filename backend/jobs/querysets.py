@@ -2,7 +2,7 @@ from django.db import models
 from jobs.choices import JobPostStatus
 
 class JobPostQuerySet(models.QuerySet):
-    def visible(self):
+    def visible_to_users(self):
         return self.exclude(status=JobPostStatus.ARCHIVED).exclude(status=JobPostStatus.CLOSED)
 
     def filter_by_location(self, location):

@@ -3,9 +3,9 @@ from users.models import CustomUser
 
 from companies.models import Company
 
-from .managers import JobPostManager
+from jobs.managers import JobPostManager
 
-from .choices import JobPostStatus, EmploymentTypes, WorkModeChoices
+from jobs.choices import JobPostStatus, EmploymentTypes, WorkModeChoices
 
 # Create your models here.
 
