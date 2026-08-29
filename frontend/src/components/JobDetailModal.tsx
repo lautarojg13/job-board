@@ -8,8 +8,8 @@ import { Modal } from './common/Modal';
 interface JobDetailModalProps {
   jobId: number | null;
   onClose: () => void;
-  onApply: (job: JobPost) => void;
-  onAnalyzeResume: (job: JobPost) => void;
+  onApply?: (job: JobPost) => void;
+  onAnalyzeResume?: (job: JobPost) => void;
 }
 
 export const JobDetailModal: React.FC<JobDetailModalProps> = ({

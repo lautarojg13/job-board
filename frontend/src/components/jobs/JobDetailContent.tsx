@@ -1,6 +1,7 @@
 import React from 'react';
 import { Building2, MapPin, Calendar, ExternalLink, Sparkles, Send } from 'lucide-react';
 import { JobPost, PublicCompany } from '../../types';
+import { useAuth } from '../../context/AuthContext';
 
 interface JobDetailContentProps {
   job: JobPost;
@@ -17,6 +18,8 @@ export const JobDetailContent: React.FC<JobDetailContentProps> = ({
   onApply,
   onAnalyzeResume,
 }) => {
+  const { isAuthenticated } = useAuth();
+
   return (
     <div className="space-y-6">
       {/* Job Header */}
@@ -122,13 +125,15 @@ export const JobDetailContent: React.FC<JobDetailContentProps> = ({
 
       {/* Modal Actions */}
       <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <button
-          onClick={() => onAnalyzeResume(job)}
-          className="w-full sm:w-auto px-4 py-2.5 rounded-lg border border-slate-700 hover:bg-slate-800 text-sky-400 text-xs font-semibold flex items-center justify-center space-x-2 transition-colors"
-        >
-          <Sparkles className="w-4 h-4 text-sky-400" />
-          <span>AI Resume Match Check</span>
-        </button>
+        {isAuthenticated && onAnalyzeResume && (
+          <button
+            onClick={() => onAnalyzeResume(job)}
+            className="w-full sm:w-auto px-4 py-2.5 rounded-lg border border-slate-700 hover:bg-slate-800 text-sky-400 text-xs font-semibold flex items-center justify-center space-x-2 transition-colors"
+          >
+            <Sparkles className="w-4 h-4 text-sky-400" />
+            <span>AI Resume Match Check</span>
+          </button>
+        )}
 
         <div className="flex items-center space-x-3 w-full sm:w-auto justify-end">
           <button
@@ -137,13 +142,15 @@ export const JobDetailContent: React.FC<JobDetailContentProps> = ({
           >
             Cancel
           </button>
-          <button
-            onClick={() => onApply(job)}
-            className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold flex items-center justify-center space-x-2 transition-colors"
-          >
-            <Send className="w-3.5 h-3.5" />
-            <span>Apply Now</span>
-          </button>
+          {isAuthenticated && onApply && (
+            <button
+              onClick={() => onApply(job)}
+              className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold flex items-center justify-center space-x-2 transition-colors"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>Apply Now</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

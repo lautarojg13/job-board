@@ -12,7 +12,7 @@ interface CompanyModalProps {
   isCreateMode?: boolean;
   onClose: () => void;
   onCompanyCreated?: (comp: PublicCompany) => void;
-  onSelectJob?: (jobId: number) => void;
+  onViewJob?: (jobId: number) => void;
 }
 
 export const CompanyModal: React.FC<CompanyModalProps> = ({
@@ -21,7 +21,7 @@ export const CompanyModal: React.FC<CompanyModalProps> = ({
   isCreateMode = false,
   onClose,
   onCompanyCreated,
-  onSelectJob,
+  onViewJob,
 }) => {
   const [company, setCompany] = useState<PublicCompany | null>(null);
   const [jobs, setJobs] = useState<JobPost[]>([]);
@@ -80,7 +80,7 @@ export const CompanyModal: React.FC<CompanyModalProps> = ({
           company={company}
           jobs={jobs}
           onClose={onClose}
-          onSelectJob={onSelectJob}
+          onViewJob={onViewJob}
         />
       ) : null}
     </Modal>

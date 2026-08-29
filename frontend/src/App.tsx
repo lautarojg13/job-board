@@ -36,14 +36,16 @@ function MainApp() {
     setIsAuthModalOpen(true);
   };
 
+  const renderJobsView = () => (
+    <JobsView
+      onNavigateToCompanies={() => setActiveTab('companies')}
+    />
+  );
+
   const renderActiveView = () => {
     switch (activeTab) {
       case 'jobs':
-        return (
-          <JobsView
-            onNavigateToCompanies={() => setActiveTab('companies')}
-          />
-        );
+        return renderJobsView();
       case 'ai-match':
         return <AiAgentView />;
       case 'applications':
@@ -59,7 +61,7 @@ function MainApp() {
           </RequireAuth>
         );
       case 'companies':
-        return <CompaniesView onSelectJob={() => setActiveTab('jobs')} />;
+        return <CompaniesView />;
       case 'profile':
         return (
           <RequireAuth redirectTo="profile" onOpenAuthModal={handleOpenAuthModal}>
@@ -67,11 +69,7 @@ function MainApp() {
           </RequireAuth>
         );
       default:
-        return (
-          <JobsView
-            onNavigateToCompanies={() => setActiveTab('companies')}
-          />
-        );
+        return renderJobsView();
     }
   };
 

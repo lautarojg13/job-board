@@ -3,16 +3,13 @@ import { Building2 } from 'lucide-react';
 import { PublicCompany } from '../types';
 import { apiService } from '../services/api';
 import { CompanyModal } from '../components/CompanyModal';
+import { JobDetailModal } from '../components/JobDetailModal';
 import { CompaniesHeader } from '../components/companies/CompaniesHeader';
 import { CompaniesFilterBar } from '../components/companies/CompaniesFilterBar';
 import { CompanyCard } from '../components/companies/CompanyCard';
 import { LoadingState, ErrorState, EmptyState } from '../components/common/StateMessage';
 
-interface CompaniesViewProps {
-  onSelectJob?: (jobId: number) => void;
-}
-
-export const CompaniesView: React.FC<CompaniesViewProps> = ({ onSelectJob }) => {
+export const CompaniesView: React.FC = () => {
   const [companies, setCompanies] = useState<PublicCompany[]>([]);
   const [search, setSearch] = useState<string>('');
   const [ordering, setOrdering] = useState<string>('');
@@ -21,6 +18,7 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({ onSelectJob }) => 
 
   // Modals
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
+  const [viewingJobId, setViewingJobId] = useState<number | null>(null);
   const [isRegistering, setIsRegistering] = useState<boolean>(false);
 
   const loadCompanies = async () => {
@@ -86,7 +84,13 @@ export const CompaniesView: React.FC<CompaniesViewProps> = ({ onSelectJob }) => 
         isOpen={Boolean(selectedCompanyId)}
         companyId={selectedCompanyId}
         onClose={() => setSelectedCompanyId(null)}
-        onSelectJob={onSelectJob}
+        onViewJob={setViewingJobId}
+      />
+
+      {/* View Job Detail Modal (stacked over company modal) */}
+      <JobDetailModal
+        jobId={viewingJobId}
+        onClose={() => setViewingJobId(null)}
       />
 
       {/* Register Company Modal */}

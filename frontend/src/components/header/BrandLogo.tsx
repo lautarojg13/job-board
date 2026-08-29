@@ -15,7 +15,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({ onSelect }) => {
       <div>
         <div className="flex items-center space-x-2">
           <span className="font-semibold text-xl tracking-tight text-white">
-            JobBoard<span className="text-sky-400">.io</span>
+            JobBoard
           </span>
           <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">
             Careers
