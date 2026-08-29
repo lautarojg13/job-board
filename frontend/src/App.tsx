@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ApiConfigProvider, useApiConfig } from './context/ApiConfigContext';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { Header, ActiveTab } from './components/Header';
 import { Footer } from './components/Footer';
 import { ApiConfigModal } from './components/ApiConfigModal';
 import { AuthModal, AuthMode } from './components/AuthModal';
+import { RequireAuth } from './components/auth/RequireAuth';
 import { JobsView } from './views/JobsView';
 import { ApplicationsView } from './views/ApplicationsView';
 import { EmployerDashboard } from './views/EmployerDashboard';
@@ -18,6 +19,16 @@ function MainApp() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const { showDemoConfigUI } = useApiConfig();
+  const { isAuthenticated, getAndClearPostLoginRedirect } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const redirectTo = getAndClearPostLoginRedirect();
+      if (redirectTo) {
+        setActiveTab(redirectTo);
+      }
+    }
+  }, [isAuthenticated, getAndClearPostLoginRedirect]);
 
   const handleOpenAuthModal = (mode: AuthMode = 'login') => {
     setAuthMode(mode);
@@ -35,13 +46,25 @@ function MainApp() {
           />
         );
       case 'applications':
-        return <ApplicationsView />;
+        return (
+          <RequireAuth redirectTo="applications" onOpenAuthModal={handleOpenAuthModal}>
+            <ApplicationsView />
+          </RequireAuth>
+        );
       case 'employer':
-        return <EmployerDashboard />;
+        return (
+          <RequireAuth redirectTo="employer" onOpenAuthModal={handleOpenAuthModal}>
+            <EmployerDashboard />
+          </RequireAuth>
+        );
       case 'companies':
         return <CompaniesView onSelectJob={() => setActiveTab('jobs')} />;
       case 'profile':
-        return <ProfileView />;
+        return (
+          <RequireAuth redirectTo="profile" onOpenAuthModal={handleOpenAuthModal}>
+            <ProfileView />
+          </RequireAuth>
+        );
       default:
         return (
           <JobsView
