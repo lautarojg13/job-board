@@ -155,7 +155,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} [{module}] {message}',
+            'format': '{levelname} {asctime} [{name}] [{module}] {message}',
             'style': '{',
         },
     },
@@ -164,24 +164,47 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
-        'file': {
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs/jobboard.log'),
+        'django_file': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/django.log'),
+            'when': 'midnight',
+            'backupCount': 14,
+            'formatter': 'verbose',
+        },
+        'jobs_file': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/jobs.log'),
+            'when': 'midnight',
+            'backupCount': 14,
+            'formatter': 'verbose',
+        },
+        'agents_file': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/agents.log'),
+            'when': 'midnight',
+            'backupCount': 14,
+            'formatter': 'verbose',
+        },
+        'combined_file': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/combined.log'),
+            'when': 'midnight',
+            'backupCount': 14,
             'formatter': 'verbose',
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['console', 'django_file', 'combined_file'],
             'level': 'INFO',
         },
         'jobs': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console', 'jobs_file', 'combined_file'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'agents': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console', 'agents_file', 'combined_file'],
             'level': 'DEBUG',
             'propagate': True,
         },

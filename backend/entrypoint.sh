@@ -11,7 +11,7 @@ python manage.py migrate
 
 if [ "$SEED_ON_START" != "false" ]; then
   if python manage.py shell -c \
-    "from companies.models import Company; import sys; sys.exit(0 if Company.objects.filter(name__startswith='seed_company_').exists() else 1)" \
+    "from users.models import CustomUser; import sys; sys.exit(0 if CustomUser.objects.filter(username__startswith='user_').exists() else 1)" \
     >/dev/null 2>&1; then
     echo "Seed data already present, skipping seed_all."
   else

@@ -38,11 +38,16 @@ def _extract_validation_message(exc):
 def process_ai_search_task(user_prompt):
     try:
         results = async_to_sync(get_jobs_by_agent_service)(user_prompt)
-        agents_logger.debug("Gotten %d jobs", len(results))
+        jobs_data = [JobPostListSerializer(job).data for job in results]
+        agents_logger.debug(
+            "Gotten %d jobs: %s",
+            len(jobs_data),
+            [(job["id"], job["title"]) for job in jobs_data],
+        )
     except ValidationError as e:
         raise ValueError(_extract_validation_message(e))
     
-    return [JobPostListSerializer(job).data for job in results]
+    return jobs_data
 
 @shared_task
 def analyze_resume_task(job_id, resume_text):

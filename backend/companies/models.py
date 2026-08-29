@@ -5,7 +5,7 @@ from companies.choices import CompanyRoleChoices
 # Create your models here.
 
 class Company(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     website = models.URLField(blank=True, null=True, unique=True)
     logo = models.ImageField(upload_to="company_logos/", blank=True, null=True)
