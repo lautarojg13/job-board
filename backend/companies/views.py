@@ -12,6 +12,7 @@ from companies.choices import CompanyRoleChoices
 
 from jobs.serializers import JobPostListSerializer
 from jobs.models import JobPost
+from jobs.choices import JobPostStatus
 
 # Create your views here.
 
@@ -52,7 +53,7 @@ class CompanyJobListView(generics.ListAPIView):
         
         return JobPost.objects.filter(
             company_id=company_id, 
-            status=JobPost.ACTIVE
+            status=JobPostStatus.ACTIVE
         )
         
 class UserCompanyListView(generics.ListAPIView):
