@@ -36,11 +36,62 @@ class Agent(ABC):
         return f"{system_prompt}\n You must respond in {self.language}"
 
     def _safe_json(self, text):
-        """Parse a JSON string into a dict, returning an error dict on failure."""
-        try:
-            return json.loads(text)
-        except (json.JSONDecodeError, TypeError) as e:
-            return self._error(e)
+        """Parse a JSON string into a dict, returning an error dict on failure.
+
+        Tolerant parser: tries a direct ``json.loads`` first, then falls back to
+        extracting the first JSON object/array embedded in the text (models often
+        wrap their answer in markdown fences or surrounding prose).
+        """
+        if not isinstance(text, str):
+            return self._error(f"Expected a string, got {type(text).__name__}")
+
+        candidates = [text]
+
+        # Fallback: pull out the first balanced {...} or [...] block.
+        start = text.find("{")
+        if start == -1:
+            start = text.find("[")
+        if start != -1:
+            candidates.append(self._extract_json_block(text, start))
+
+        for candidate in candidates:
+            try:
+                data = json.loads(candidate)
+                if isinstance(data, (dict, list)):
+                    return data
+            except (json.JSONDecodeError, TypeError):
+                continue
+
+        return self._error(f"Could not parse model output as JSON: {text[:200]!r}")
+
+    def _extract_json_block(self, text, start):
+        """Return the substring of ``text`` covering the JSON block starting at ``start``."""
+        open_char = text[start]
+        close_char = "}" if open_char == "{" else "]"
+        depth = 0
+        in_string = False
+        escape = False
+        for i in range(start, len(text)):
+            ch = text[i]
+            if in_string:
+                if escape:
+                    escape = False
+                elif ch == "\\":
+                    escape = True
+                elif ch == '"':
+                    in_string = False
+                continue
+            if ch == '"':
+                in_string = True
+            elif ch in ('"', "'"):
+                in_string = True
+            elif ch == open_char:
+                depth += 1
+            elif ch == close_char:
+                depth -= 1
+                if depth == 0:
+                    return text[start : i + 1]
+        return text[start:]
 
     def _error(self, details):
         return {"error": "AI service error.", "details": str(details)}
@@ -103,8 +154,11 @@ class OllamaAgent(Agent):
                 response = await client.post(self.url, json=data)
                 response.raise_for_status()  # Raise an exception for bad status codes
 
-                # Extract and parse the response
-                result = response.json().get("response", "{}")
+                # Extract and parse the response.
+                # Reasoning models (e.g. qwen3) may leave `response` empty and
+                # put the answer in `thinking`, so fall back to it.
+                body = response.json()
+                result = body.get("response") or body.get("thinking") or ""
                 return self._safe_json(result)
         except httpx.HTTPError as e:
             # Return error information if the API call fails

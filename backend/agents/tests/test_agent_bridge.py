@@ -88,6 +88,53 @@ class TestCallModel:
 
         assert result["error"] == "AI service error."
 
+    @pytest.mark.asyncio
+    async def test_falls_back_to_thinking_when_response_empty(self):
+        """Reasoning models (qwen3) leave response empty and put JSON in thinking."""
+        agent = OllamaAgent()
+
+        fake_response = MagicMock()
+        fake_response.raise_for_status.return_value = None
+        fake_response.json.return_value = {
+            "response": "",
+            "thinking": json.dumps({"result": "from-thinking"}),
+        }
+
+        with patch("agents.agent_bridge.httpx.AsyncClient") as client:
+            client.return_value.__aenter__.return_value.post = AsyncMock(
+                return_value=fake_response
+            )
+
+            result = await agent.call_model(
+                system_prompt="system",
+                user_prompt="user",
+            )
+
+        assert result == {"result": "from-thinking"}
+
+    @pytest.mark.asyncio
+    async def test_parses_json_wrapped_in_markdown_or_prose(self):
+        """Tolerant parsing: models may wrap JSON in markdown fences or prose."""
+        agent = OllamaAgent()
+
+        fake_response = MagicMock()
+        fake_response.raise_for_status.return_value = None
+        fake_response.json.return_value = {
+            "response": 'Here is the result:\n```json\n{"result": "ok"}\n```\nEnjoy.'
+        }
+
+        with patch("agents.agent_bridge.httpx.AsyncClient") as client:
+            client.return_value.__aenter__.return_value.post = AsyncMock(
+                return_value=fake_response
+            )
+
+            result = await agent.call_model(
+                system_prompt="system",
+                user_prompt="user",
+            )
+
+        assert result == {"result": "ok"}
+
 
 class TestGetAgent:
     def test_defaults_to_ollama(self, settings):

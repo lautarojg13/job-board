@@ -128,9 +128,12 @@ The default `OLLAMA_MODEL_NAME=llama3.2:3b` (~2 GB download) is a good balance o
 | --- | --- | --- | --- |
 | Quick start / testing | `llama3.2:3b` | ~2 GB | Fast on CPU, good JSON output |
 | Lightest | `llama3.2:1b` | ~1.3 GB | For very limited machines |
+| qwen-compatible, non-thinking | `qwen2.5:3b` | ~2 GB | Good JSON output, no reasoning |
 | Realistic experience | `llama3:8b` | ~4.7 GB | More accurate, closer to production |
 
 To switch models, set `OLLAMA_MODEL_NAME` in `.env` and recreate the container: `docker compose up -d ollama`. The model download happens only once; the rest of the stack (backend, Celery, frontend) starts regardless, so AI endpoints simply return an error until the model is ready.
+
+> **Model guidance.** The default `llama3.2:3b` is a non-reasoning model with reliable JSON output and is the recommended choice. The `OllamaAgent` parser is designed to be tolerant: it falls back to the `thinking` field when a model (e.g. the `qwen3` family) leaves `response` empty, and it extracts JSON even when wrapped in markdown fences or surrounding prose (`backend/agents/agent_bridge.py::_safe_json`). So reasoning models can work too, but a non-reasoning model like `llama3.2:3b` / `qwen2.5:3b` gives the most consistent results.
 
 ### Swapping the AI Provider (Cloud)
 

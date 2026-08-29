@@ -15,13 +15,32 @@ import logging
 
 agents_logger = logging.getLogger("agents")
 
+def _extract_validation_message(exc):
+    """Return a plain readable message from a DRF ValidationError,
+    avoiding the repr of the internal ErrorDetail objects."""
+    detail = exc.detail
+
+    if isinstance(detail, dict):
+        parts = []
+        for key, value in detail.items():
+            if isinstance(value, (list, tuple)):
+                value = value[0] if value else ""
+            parts.append(f"{key}: {value}")
+        return "; ".join(parts)
+
+    if isinstance(detail, (list, tuple)):
+        first = detail[0] if detail else ""
+        return str(first) if first else str(exc)
+
+    return str(detail)
+
 @shared_task
 def process_ai_search_task(user_prompt):
     try:
         results = async_to_sync(get_jobs_by_agent_service)(user_prompt)
         agents_logger.debug("Gotten %d jobs", len(results))
     except ValidationError as e:
-        raise ValueError(str(e))
+        raise ValueError(_extract_validation_message(e))
     
     return [JobPostListSerializer(job).data for job in results]
 

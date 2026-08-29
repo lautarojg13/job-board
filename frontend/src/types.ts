@@ -234,6 +234,7 @@ export interface TaskStatusResponse<T = ResumeAnalysisResult> {
   task_id: string;
   status: 'PENDING' | 'STARTED' | 'SUCCESS' | 'FAILURE' | 'REVOKED' | string;
   result: T | null;
+  error?: string | null;
 }
 
 export interface Paginated<T> {

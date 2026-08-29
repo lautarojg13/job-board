@@ -126,6 +126,7 @@ export function useTaskStatus<T = ResumeAnalysisResult>(
           setIsPolling(false);
           const raw = taskResult as any;
           const errorMsg =
+            (response as any)?.error ||
             raw?.error ||
             raw?.details ||
             (typeof raw === 'string' && raw) ||

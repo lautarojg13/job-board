@@ -283,6 +283,7 @@ CELERY_TASK_SERIALIZER = 'json'
 
 # Ollama
 OLLAMA_API_URL = config("OLLAMA_API_URL", default="http://localhost:11434/api/generate")
+OLLAMA_MODEL_NAME = config("OLLAMA_MODEL_NAME", default="llama3.2:3b")
 
 # AI provider abstraction (ollama | openai | deepseek | gemini).
 # Cloud providers use the OpenAI-compatible chat-completions endpoint.

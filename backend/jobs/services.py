@@ -7,6 +7,10 @@ from asgiref.sync import sync_to_async
 from agents.assistants import JobAssistantAgent
 from agents.serializers.output_serializers import JobParamsResponseSerializer
 
+import logging
+
+agents_logger = logging.getLogger("agents")
+
 
 async def get_jobs_by_agent_service(user_prompt):
     agent = JobAssistantAgent()
@@ -17,6 +21,11 @@ async def get_jobs_by_agent_service(user_prompt):
     while attempt < 3:
         params = await agent.search_job_params(user_prompt, errors=last_errors)
         if params.get("error"):
+            agents_logger.warning(
+                "[AI agent search] attempt %d: agent returned error, full params=%r",
+                attempt + 1,
+                params,
+            )
             last_errors = None
             attempt += 1
             continue
@@ -25,6 +34,12 @@ async def get_jobs_by_agent_service(user_prompt):
         if serializer.is_valid():
             break
         
+        agents_logger.warning(
+            "[AI agent search] attempt %d: invalid params=%r errors=%r",
+            attempt + 1,
+            params,
+            serializer.errors,
+        )
         last_errors = serializer.errors
         attempt += 1
     

@@ -154,16 +154,35 @@ class TaskStatusView(APIView):
                 "task_id": serializers.CharField(),
                 "status": serializers.CharField(),
                 "result": serializers.JSONField(allow_null=True),
+                "error": serializers.CharField(allow_null=True, required=False),
             },
         )
     )
     def get(self, request, task_id, *args, **kwargs):
         task_result = AsyncResult(task_id)
-        
-        jobs_logger.debug(f"Current task info: STATUS:{task_result.status}, READY: {task_result.ready()}, RESULT={task_result.result if task_result.ready() else None}")
-        
-        return Response({
+
+        data = {
             "task_id": task_id,
             "status": task_result.status,
-            "result": task_result.result if task_result.ready() else None
-        })
+            "result": None,
+        }
+
+        if task_result.ready():
+            if task_result.status in ("FAILURE", "REVOKED", "RETRY"):
+                data["error"] = (
+                    str(task_result.result)
+                    if task_result.result
+                    else f"Task ended with status: {task_result.status}"
+                )
+            else:
+                data["result"] = task_result.result
+
+        jobs_logger.debug(
+            "Task status for %s -> STATUS:%s READY:%s RESULT:%s",
+            task_id,
+            task_result.status,
+            task_result.ready(),
+            task_result.result if task_result.ready() else None,
+        )
+
+        return Response(data)
