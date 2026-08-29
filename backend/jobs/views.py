@@ -20,6 +20,10 @@ from jobs.pagination import JobPostPagination
 
 from celery.result import AsyncResult
 
+import logging
+
+jobs_logger = logging.getLogger("jobs")
+
 RESUME_ANALYSIS_STARTED_MESSAGE = "Resume analize Started"
 JOB_SEARCH_STARTED_MESSAGE = "Searching for jobs..."
 
@@ -98,7 +102,11 @@ class GetJobsByAgentView(generics.GenericAPIView):
         
         user_prompt = serializer.validated_data["user_prompt"]
         
+        jobs_logger.info(f"User sent their prompt: {user_prompt}")
+        
         task = process_ai_search_task.delay(user_prompt)
+        
+        jobs_logger.debug(f"Generated a new task: task_id={task.id}")
         
         return Response({"task_id": task.id, "message": JOB_SEARCH_STARTED_MESSAGE}, status=status.HTTP_202_ACCEPTED)
 
@@ -151,6 +159,8 @@ class TaskStatusView(APIView):
     )
     def get(self, request, task_id, *args, **kwargs):
         task_result = AsyncResult(task_id)
+        
+        jobs_logger.debug(f"Current task info: STATUS:{task_result.status}, READY: {task_result.ready()}, RESULT={task_result.result if task_result.ready() else None}")
         
         return Response({
             "task_id": task_id,

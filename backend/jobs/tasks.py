@@ -5,13 +5,24 @@ from jobs.services import get_jobs_by_agent_service
 
 from asgiref.sync import async_to_sync
 
+from rest_framework.exceptions import ValidationError
+
 from agents.assistants import JobAssistantAgent
 from agents.serializers.output_serializers import ResumeAnalysisResultSerializer
 from jobs.serializers import JobPostListSerializer
 
+import logging
+
+agents_logger = logging.getLogger("agents")
+
 @shared_task
 def process_ai_search_task(user_prompt):
-    results = async_to_sync(get_jobs_by_agent_service)(user_prompt)
+    try:
+        results = async_to_sync(get_jobs_by_agent_service)(user_prompt)
+        agents_logger.debug("Gotten %d jobs", len(results))
+    except ValidationError as e:
+        raise ValueError(str(e))
+    
     return [JobPostListSerializer(job).data for job in results]
 
 @shared_task
