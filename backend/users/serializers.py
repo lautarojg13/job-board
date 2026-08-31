@@ -11,6 +11,24 @@ class CustomUserRegistrationSerializer(RegisterSerializer):
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
     
+    def validate_first_name(self, first_name):
+        
+        if not first_name.isalpha():
+            raise serializers.ValidationError(
+                "Invalid name, it must be complently alphabetic"
+            )
+        
+        return first_name
+    
+    def validate_last_name(self, last_name):
+        
+        if not last_name.isalpha():
+            raise serializers.ValidationError(
+                "Invalid last name, it must be complently alphabetic"
+            )
+        
+        return last_name
+    
     def validate_email(self, email):
         if filter_users_by_email(email):
             raise serializers.ValidationError(
