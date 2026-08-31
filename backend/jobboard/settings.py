@@ -3,9 +3,12 @@ from pathlib import Path
 from decouple import config
 
 import os
+import sys
 import pymysql
 
 pymysql.install_as_MySQLdb()
+
+TESTING = os.path.basename(sys.argv[0]).startswith('pytest')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -210,6 +213,11 @@ LOGGING = {
         },
     },
 }
+
+if TESTING:
+    LOGGING['handlers'] = {'console': LOGGING['handlers']['console']}
+    for _cfg in LOGGING['loggers'].values():
+        _cfg['handlers'] = ['console']
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',

@@ -13,21 +13,24 @@ class CustomUserRegistrationSerializer(RegisterSerializer):
     
     def validate_first_name(self, first_name):
         
-        if not first_name.isalpha():
+        if not self._is_valid_name(first_name):
             raise serializers.ValidationError(
-                "Invalid name, it must be complently alphabetic"
+                "Invalid name, it must only contain letters and spaces"
             )
         
         return first_name
     
     def validate_last_name(self, last_name):
         
-        if not last_name.isalpha():
+        if not self._is_valid_name(last_name):
             raise serializers.ValidationError(
-                "Invalid last name, it must be complently alphabetic"
+                "Invalid last name, it must only contain letters and spaces"
             )
         
         return last_name
+    
+    def _is_valid_name(self, name):
+        return bool(name) and all(ch.isalpha() or ch == " " for ch in name)
     
     def validate_email(self, email):
         if filter_users_by_email(email):
