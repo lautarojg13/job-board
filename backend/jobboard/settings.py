@@ -2,9 +2,13 @@ from datetime import timedelta
 from pathlib import Path
 from decouple import config
 
+import os
+import sys
 import pymysql
 
 pymysql.install_as_MySQLdb()
+
+TESTING = os.path.basename(sys.argv[0]).startswith('pytest')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -55,6 +59,10 @@ INSTALLED_APPS = [
 ]
 
 AUTH_USER_MODEL = "users.CustomUser"
+
+AUTHENTICATION_BACKENDS = [
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -145,6 +153,72 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} [{name}] [{module}] {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'django_file': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/django.log'),
+            'when': 'midnight',
+            'backupCount': 14,
+            'formatter': 'verbose',
+        },
+        'jobs_file': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/jobs.log'),
+            'when': 'midnight',
+            'backupCount': 14,
+            'formatter': 'verbose',
+        },
+        'agents_file': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/agents.log'),
+            'when': 'midnight',
+            'backupCount': 14,
+            'formatter': 'verbose',
+        },
+        'combined_file': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/combined.log'),
+            'when': 'midnight',
+            'backupCount': 14,
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'django_file', 'combined_file'],
+            'level': 'INFO',
+        },
+        'jobs': {
+            'handlers': ['console', 'jobs_file', 'combined_file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'agents': {
+            'handlers': ['console', 'agents_file', 'combined_file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
+if TESTING:
+    LOGGING['handlers'] = {'console': LOGGING['handlers']['console']}
+    for _cfg in LOGGING['loggers'].values():
+        _cfg['handlers'] = ['console']
+
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -214,7 +288,7 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 
-    "TOKEN_OBTAIN_SERIALIZER": "users.serializers.CustomTokenObtainPairSerializer",
+    "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
     "TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSerializer",
     "TOKEN_VERIFY_SERIALIZER": "rest_framework_simplejwt.serializers.TokenVerifySerializer",
     "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
@@ -223,6 +297,9 @@ SIMPLE_JWT = {
 }
 
 REST_AUTH = {
+    "USE_JWT": True,
+    "JWT_AUTH_HTTPONLY": False,
+    "LOGIN_SERIALIZER": "users.serializers.CustomLoginSerializer",
     "REGISTER_SERIALIZER":"users.serializers.CustomUserRegistrationSerializer",
     "USER_DETAILS_SERIALIZER": "users.serializers.CustomUserDetailsSerializer",
 }
@@ -237,6 +314,7 @@ CELERY_TASK_SERIALIZER = 'json'
 
 # Ollama
 OLLAMA_API_URL = config("OLLAMA_API_URL", default="http://localhost:11434/api/generate")
+OLLAMA_MODEL_NAME = config("OLLAMA_MODEL_NAME", default="llama3.2:3b")
 
 # AI provider abstraction (ollama | openai | deepseek | gemini).
 # Cloud providers use the OpenAI-compatible chat-completions endpoint.
@@ -254,7 +332,7 @@ EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
 
-ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_LOGIN_METHODS = {'email', 'username'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'

@@ -2,10 +2,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from companies.choices import CompanyRoleChoices
-from companies.management.commands.seed_utils import (
-    build_seed_company,
-    get_next_seed_company_index,
-)
+from companies.management.commands.seed_utils import build_seed_companies
 from companies.models import Company, CompanyMember
 from users.choices import UserRoleChoices
 from users.management.commands.seed_utils import (
@@ -46,7 +43,6 @@ class Command(BaseCommand):
             return
 
         username_index = get_next_seed_username_index()
-        company_index = get_next_seed_company_index()
 
         owners = [
             build_seed_user(
@@ -74,10 +70,7 @@ class Command(BaseCommand):
         }
         created_users = [user_by_username[user.username] for user in all_users]
 
-        companies = [
-            build_seed_company(company_index + i)
-            for i in range(total)
-        ]
+        companies = build_seed_companies(total)
         Company.objects.bulk_create(companies)
 
         company_by_name = {

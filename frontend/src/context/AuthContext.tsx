@@ -5,6 +5,7 @@ import {
   CustomUserRegistrationRequest,
   PatchedCustomUserDetailsRequest
 } from '../types';
+import type { ActiveTab } from '../components/Header';
 import {
   apiService,
   getStoredAuthToken,
@@ -22,6 +23,8 @@ interface AuthContextType {
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   updateProfile: (data: PatchedCustomUserDetailsRequest) => Promise<void>;
+  setPostLoginRedirect: (tab: ActiveTab) => void;
+  getAndClearPostLoginRedirect: () => ActiveTab | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,6 +33,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<CustomUserDetails | null>(null);
   const [token, setToken] = useState<string | null>(getStoredAuthToken());
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const postLoginRedirectRef = React.useRef<ActiveTab | null>(null);
+
+  const setPostLoginRedirect = (tab: ActiveTab) => {
+    postLoginRedirectRef.current = tab;
+  };
+
+  const getAndClearPostLoginRedirect = (): ActiveTab | null => {
+    const tab = postLoginRedirectRef.current;
+    postLoginRedirectRef.current = null;
+    return tab;
+  };
 
   const fetchCurrentUser = async () => {
     setIsLoading(true);
@@ -94,7 +108,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         register,
         logout,
         refreshUser,
-        updateProfile
+        updateProfile,
+        setPostLoginRedirect,
+        getAndClearPostLoginRedirect
       }}
     >
       {children}

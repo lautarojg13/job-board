@@ -234,6 +234,14 @@ export interface TaskStatusResponse<T = ResumeAnalysisResult> {
   task_id: string;
   status: 'PENDING' | 'STARTED' | 'SUCCESS' | 'FAILURE' | 'REVOKED' | string;
   result: T | null;
+  error?: string | null;
+}
+
+export interface Paginated<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
 }
 
 export interface JobsListQueryParams {
@@ -243,6 +251,8 @@ export interface JobsListQueryParams {
   max_salary?: number;
   min_salary?: number;
   ordering?: string;
+  page?: number;
+  page_size?: number;
   search?: string;
   title?: string;
 }

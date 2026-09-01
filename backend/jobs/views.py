@@ -1,13 +1,11 @@
 from drf_spectacular.utils import extend_schema, inline_serializer
 
-
 from rest_framework import serializers
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.decorators import APIView
 from rest_framework.exceptions import ValidationError
-
 
 from agents.serializers.input_serializers import ResumeAnalysisSerializer, JobSearchInputSerializer
 
@@ -18,10 +16,15 @@ from jobs.choices import JobPostStatus
 from jobs.models import JobPost
 from jobs.tasks import process_ai_search_task, analyze_resume_task
 from jobs.utils.pdf_handler import extract_text_from_pdf
+from jobs.pagination import JobPostPagination
 
 from celery.result import AsyncResult
 
-RESUME_ANALYSIS_STARTED_MESSAGE = "Análisis de CV iniciado"
+import logging
+
+jobs_logger = logging.getLogger("jobs")
+
+RESUME_ANALYSIS_STARTED_MESSAGE = "Resume analize Started"
 JOB_SEARCH_STARTED_MESSAGE = "Searching for jobs..."
 
 # Create your views here.
@@ -32,11 +35,15 @@ class JobPostListView(generics.ListAPIView):
     permission_classes = [AllowAny]
     filterset_class = JobPostFilter
     ordering_fields = ["posted_at", "salary"]
+    pagination_class = JobPostPagination
 
-    ordering = ["-posted_at"]
-    
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if not self.request.query_params.get("ordering"):
+            return qs.order_by("?")
+        return qs
+
 class JobPostCreateView(generics.CreateAPIView):
-    queryset = JobPost.objects.all()
     serializer_class = JobPostCreateSerializer
     permission_classes = [IsAuthenticated]
 
@@ -95,7 +102,11 @@ class GetJobsByAgentView(generics.GenericAPIView):
         
         user_prompt = serializer.validated_data["user_prompt"]
         
+        jobs_logger.info(f"User sent their prompt: {user_prompt}")
+        
         task = process_ai_search_task.delay(user_prompt)
+        
+        jobs_logger.debug(f"Generated a new task: task_id={task.id}")
         
         return Response({"task_id": task.id, "message": JOB_SEARCH_STARTED_MESSAGE}, status=status.HTTP_202_ACCEPTED)
 
@@ -143,14 +154,35 @@ class TaskStatusView(APIView):
                 "task_id": serializers.CharField(),
                 "status": serializers.CharField(),
                 "result": serializers.JSONField(allow_null=True),
+                "error": serializers.CharField(allow_null=True, required=False),
             },
         )
     )
     def get(self, request, task_id, *args, **kwargs):
         task_result = AsyncResult(task_id)
-        
-        return Response({
+
+        data = {
             "task_id": task_id,
             "status": task_result.status,
-            "result": task_result.result if task_result.ready() else None
-        })
+            "result": None,
+        }
+
+        if task_result.ready():
+            if task_result.status in ("FAILURE", "REVOKED", "RETRY"):
+                data["error"] = (
+                    str(task_result.result)
+                    if task_result.result
+                    else f"Task ended with status: {task_result.status}"
+                )
+            else:
+                data["result"] = task_result.result
+
+        jobs_logger.debug(
+            "Task status for %s -> STATUS:%s READY:%s RESULT:%s",
+            task_id,
+            task_result.status,
+            task_result.ready(),
+            task_result.result if task_result.ready() else None,
+        )
+
+        return Response(data)

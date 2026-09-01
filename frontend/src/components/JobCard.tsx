@@ -1,6 +1,7 @@
 import React from 'react';
 import { MapPin, DollarSign, Clock, Building2, Briefcase, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { JobPost, PublicCompany } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 interface JobCardProps {
   job: JobPost;
@@ -10,6 +11,8 @@ interface JobCardProps {
 }
 
 export const JobCard: React.FC<JobCardProps> = ({ job, company, onSelect, onQuickApply }) => {
+  const { isAuthenticated } = useAuth()
+
   const getWorkModeBadge = (mode?: string) => {
     switch (mode) {
       case 'remote':
@@ -87,7 +90,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job, company, onSelect, onQuic
         <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 border-slate-800/80 pt-3 sm:pt-0 shrink-0">
           <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hidden sm:block mb-2">Active Role</span>
           <div className="flex items-center space-x-2">
-            {onQuickApply && (
+            {onQuickApply && isAuthenticated && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();

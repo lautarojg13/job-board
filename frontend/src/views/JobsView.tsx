@@ -7,41 +7,45 @@ import { JobSearchFilter } from '../components/JobSearchFilter';
 import { JobDetailModal } from '../components/JobDetailModal';
 import { ApplyModal } from '../components/ApplyModal';
 import { ResumeAnalysisModal } from '../components/ResumeAnalysisModal';
-import { AiAgentSearch } from '../components/AiAgentSearch';
 import { JobsHeroHeader } from '../components/jobs/JobsHeroHeader';
 import { JobsListHeader } from '../components/jobs/JobsListHeader';
 import { LoadingState, ErrorState, EmptyState } from '../components/common/StateMessage';
 
 interface JobsViewProps {
-  onNavigateToEmployer: () => void;
   onNavigateToCompanies: () => void;
 }
 
-export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToEmployer }) => {
+export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToCompanies }) => {
   const [jobs, setJobs] = useState<JobPost[]>([]);
   const [companiesMap, setCompaniesMap] = useState<Record<number, PublicCompany>>({});
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState<boolean>(false);
+  const [nextPage, setNextPage] = useState<number>(2);
+  const [totalJobs, setTotalJobs] = useState<number>(0);
+  const [requestId, setRequestId] = useState<number>(0);
 
   const [filters, setFilters] = useState<JobsListQueryParams>({});
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
-  const [aiResults, setAiResults] = useState<JobPost[] | null>(null);
 
   // Modal triggers
   const [applyJob, setApplyJob] = useState<JobPost | null>(null);
   const [analyzeJob, setAnalyzeJob] = useState<JobPost | null>(null);
-  const [showAiAgent, setShowAiAgent] = useState<boolean>(false);
 
   const loadData = async () => {
     setLoading(true);
     setError(null);
     try {
       const [jobsData, companiesData] = await Promise.all([
-        apiService.getJobsList(filters),
+        apiService.getJobsList({ ...filters, page: 1 }),
         apiService.getCompanies().catch(() => [])
       ]);
 
-      setJobs(jobsData);
+      setJobs(jobsData.results);
+      setTotalJobs(jobsData.count);
+      setHasMore(jobsData.next !== null);
+      setNextPage(2);
 
       const compMap: Record<number, PublicCompany> = {};
       companiesData.forEach((c) => {
@@ -57,74 +61,61 @@ export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToEmployer }) => {
 
   useEffect(() => {
     loadData();
-  }, [JSON.stringify(filters)]);
+  }, [JSON.stringify(filters), requestId]);
 
-  const handleAgentResults = (matchedJobs: JobPost[] | null) => {
-    setAiResults(matchedJobs);
+  const loadMore = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const jobsData = await apiService.getJobsList({ ...filters, page: nextPage });
+      setJobs((prev) => [...prev, ...jobsData.results]);
+      setHasMore(jobsData.next !== null);
+      setNextPage((p) => p + 1);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load more jobs.');
+    } finally {
+      setLoadingMore(false);
+    }
   };
 
-  const displayedJobs = aiResults !== null ? aiResults : jobs;
+  const refresh = () => setRequestId((r) => r + 1);
+
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Hero Header */}
-      <JobsHeroHeader
-        showAiAgent={showAiAgent}
-        onToggleAiAgent={() => setShowAiAgent(!showAiAgent)}
-        onNavigateToEmployer={onNavigateToEmployer}
-      />
-
-      {/* Optional AI Agent Prompt Search */}
-      {showAiAgent && (
-        <AiAgentSearch onFilteredResults={handleAgentResults} />
-      )}
+      <JobsHeroHeader />
 
       {/* Job Search & Filter Controls */}
       <JobSearchFilter
         filters={filters}
-        onChange={(newFilters) => {
-          setAiResults(null);
-          setFilters(newFilters);
-        }}
-        onReset={() => {
-          setAiResults(null);
-          setFilters({});
-        }}
+        onChange={(newFilters) => setFilters(newFilters)}
+        onReset={() => setFilters({})}
       />
 
       {/* Job Listings List */}
       <div className="space-y-4">
         <JobsListHeader
-          totalJobs={displayedJobs.length}
+          totalJobs={totalJobs}
           loading={loading}
-          onRefresh={loadData}
+          onRefresh={refresh}
         />
 
         {loading ? (
           <LoadingState message="Fetching active job postings..." />
         ) : error ? (
           <ErrorState error={error} onRetry={loadData} />
-        ) : displayedJobs.length === 0 ? (
+        ) : jobs.length === 0 ? (
           <EmptyState
             icon={Briefcase}
             title="No Job Listings Found"
-            description={
-              aiResults !== null
-                ? 'No jobs matched your AI prompt criteria. Try refining your agent query.'
-                : 'No jobs matched your current filter criteria. Try adjusting your search keywords, location, or salary parameters.'
-            }
-            actionText={aiResults !== null ? 'Clear AI Filter' : 'Reset Filters'}
-            onAction={() => {
-              if (aiResults !== null) {
-                setAiResults(null);
-              } else {
-                setFilters({});
-              }
-            }}
+            description="No jobs matched your current filter criteria. Try adjusting your search keywords, location, or salary parameters."
+            actionText="Reset Filters"
+            onAction={() => setFilters({})}
           />
         ) : (
           <div className="grid grid-cols-1 gap-3">
-            {displayedJobs.map((job) => (
+            {jobs.map((job) => (
               <JobCard
                 key={job.id}
                 job={job}
@@ -140,6 +131,18 @@ export const JobsView: React.FC<JobsViewProps> = ({ onNavigateToEmployer }) => {
                 }}
               />
             ))}
+          </div>
+        )}
+
+        {hasMore && !error && (
+          <div className="flex justify-center pt-4">
+            <button
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="inline-flex items-center px-5 py-2.5 text-sm font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {loadingMore ? 'Loading...' : 'Load more'}
+            </button>
           </div>
         )}
       </div>

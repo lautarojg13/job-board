@@ -1,7 +1,6 @@
 from rest_framework.permissions import BasePermission
 from companies.models import CompanyMember
 from companies.choices import CompanyRoleChoices
-from .models import JobPost
 
 
 class IsJobOwner(BasePermission):

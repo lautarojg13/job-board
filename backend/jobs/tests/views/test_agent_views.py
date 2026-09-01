@@ -82,6 +82,23 @@ class TestTaskStatusView:
         }
         mock_async_result.assert_called_once_with(task_id)
 
+    @patch("jobs.views.AsyncResult")
+    def test_returns_error_string_not_raw_exception_on_failure(self, mock_async_result):
+        client = APIClient()
+        task_id = "abc-123"
+        task_result = mock_async_result.return_value
+        task_result.status = states.FAILURE
+        task_result.ready.return_value = True
+        task_result.result = ValueError("There was an error while processing the data")
+
+        response = client.get(reverse("task_status", kwargs={"task_id": task_id}))
+
+        assert response.status_code == 200
+        assert response.data["status"] == states.FAILURE
+        assert response.data["result"] is None
+        assert response.data["error"] == "There was an error while processing the data"
+        mock_async_result.assert_called_once_with(task_id)
+
 
 @pytest.mark.django_db
 class TestGetOwnerJobPostListView:

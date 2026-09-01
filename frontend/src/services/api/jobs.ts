@@ -8,7 +8,8 @@ import {
   ResumeAnalysisStart,
   ResumeAnalysisResult,
   TaskStatusResponse,
-  JobsListQueryParams
+  JobsListQueryParams,
+  Paginated
 } from '../../types';
 import { apiFetch, buildQueryString, jsonRequest } from './client';
 
@@ -19,7 +20,7 @@ export interface OwnerJobsQueryParams {
 
 export const jobsApi = {
   getJobsList: (params?: JobsListQueryParams) =>
-    apiFetch<JobPost[]>(`/jobs/get-jobs-list/${buildQueryString(params)}`, { method: 'GET' }),
+    apiFetch<Paginated<JobPost>>(`/jobs/get-jobs-list/${buildQueryString(params)}`, { method: 'GET' }),
 
   getJobDetails: (job_id: number) =>
     apiFetch<JobPost>(`/jobs/get-job-details/${job_id}/`, { method: 'GET' }),

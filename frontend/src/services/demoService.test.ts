@@ -1,19 +1,20 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { handleMockRequest, getMockState, saveMockState } from './demoService';
-import { JobPost, PublicCompany, ApplicationList, TaskStatusResponse } from '../types';
+import { JobPost, PublicCompany, ApplicationList, TaskStatusResponse, Paginated } from '../types';
 
 describe('demoService - Mock Engine & Shape Verification', () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
-  it('GET /jobs/get-jobs-list/ -> returns array of JobPost', () => {
-    const jobs = handleMockRequest<JobPost[]>('/jobs/get-jobs-list/', { method: 'GET' });
-    expect(Array.isArray(jobs)).toBe(true);
-    expect(jobs.length).toBeGreaterThan(0);
-    expect(jobs[0]).toHaveProperty('id');
-    expect(jobs[0]).toHaveProperty('title');
-    expect(jobs[0]).toHaveProperty('company');
+  it('GET /jobs/get-jobs-list/ -> returns paginated results', () => {
+    const jobs = handleMockRequest<Paginated<JobPost>>('/jobs/get-jobs-list/', { method: 'GET' });
+    expect(Array.isArray(jobs.results)).toBe(true);
+    expect(jobs.results).toHaveProperty('length');
+    expect(jobs.count).toBeGreaterThan(0);
+    expect(jobs.results[0]).toHaveProperty('id');
+    expect(jobs.results[0]).toHaveProperty('title');
+    expect(jobs.results[0]).toHaveProperty('company');
   });
 
   it('GET /jobs/get-job-details/{id}/ -> returns JobPost object', () => {
@@ -25,8 +26,8 @@ describe('demoService - Mock Engine & Shape Verification', () => {
     expect(job.title).toBe(targetJob.title);
   });
 
-  it('POST /auth/token/ -> returns { access, refresh }', () => {
-    const res = handleMockRequest<{ access: string; refresh: string }>('/auth/token/', {
+  it('POST /auth/login/ -> returns { access, refresh }', () => {
+    const res = handleMockRequest<{ access: string; refresh: string }>('/auth/login/', {
       method: 'POST',
       body: JSON.stringify({ username: 'demo', password: 'demo-password' })
     });
@@ -73,8 +74,8 @@ describe('demoService - Mock Engine & Shape Verification', () => {
 
   describe('Sync Guard: Every frontend API route has a mock handler', () => {
     const testCases: Array<{ name: string; endpoint: string; method: string; body?: any }> = [
-      { name: 'login', endpoint: '/auth/token/', method: 'POST', body: JSON.stringify({ username: 'u', password: 'p' }) },
-      { name: 'logout', endpoint: '/auth/token/blacklist/', method: 'POST', body: JSON.stringify({ refresh: 'r' }) },
+      { name: 'login', endpoint: '/auth/login/', method: 'POST', body: JSON.stringify({ username: 'u', password: 'p' }) },
+      { name: 'logout', endpoint: '/auth/logout/', method: 'POST', body: JSON.stringify({ refresh: 'r' }) },
       { name: 'register', endpoint: '/auth/registration/', method: 'POST', body: JSON.stringify({ username: 'u', email: 'e@t.com' }) },
       { name: 'resendEmailVerification', endpoint: '/auth/registration/resend-email/', method: 'POST' },
       { name: 'verifyEmail', endpoint: '/auth/registration/verify-email/', method: 'POST' },

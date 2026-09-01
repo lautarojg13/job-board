@@ -6,14 +6,14 @@ interface CompanyDetailContentProps {
   company: PublicCompany;
   jobs: JobPost[];
   onClose: () => void;
-  onSelectJob?: (jobId: number) => void;
+  onViewJob?: (jobId: number) => void;
 }
 
 export const CompanyDetailContent: React.FC<CompanyDetailContentProps> = ({
   company,
   jobs,
   onClose,
-  onSelectJob,
+  onViewJob,
 }) => {
   return (
     <div className="space-y-6">
@@ -64,8 +64,7 @@ export const CompanyDetailContent: React.FC<CompanyDetailContentProps> = ({
               <div
                 key={j.id}
                 onClick={() => {
-                  if (onSelectJob) onSelectJob(j.id);
-                  onClose();
+                  if (onViewJob) onViewJob(j.id);
                 }}
                 className="p-3.5 rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-sky-500/40 flex items-center justify-between cursor-pointer transition-colors text-xs"
               >

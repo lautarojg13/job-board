@@ -16,10 +16,10 @@ import { apiFetch, jsonRequest } from './client';
 
 export const authApi = {
   login: (data: LoginRequest) =>
-    apiFetch<Token>('/auth/token/', jsonRequest('POST', data)),
+    apiFetch<Token>('/auth/login/', jsonRequest('POST', data)),
 
   logout: () =>
-    apiFetch<RestAuthDetail>('/auth/token/blacklist/', jsonRequest('POST', { refresh: getStoredRefreshToken() })),
+    apiFetch<RestAuthDetail>('/auth/logout/', jsonRequest('POST', { refresh: getStoredRefreshToken() })),
 
   register: (data: CustomUserRegistrationRequest) =>
     apiFetch<RestAuthDetail>('/auth/registration/', jsonRequest('POST', data)),

@@ -17,8 +17,8 @@ from drf_spectacular.generators import SchemaGenerator
 
 # (path, method) pairs consumed by frontend/src/services/api/**/*.ts
 EXPECTED_ENDPOINTS = {
-    "/auth/token/": ["post"],
-    "/auth/token/blacklist/": ["post"],
+    "/auth/login/": ["post"],
+    "/auth/logout/": ["post"],
     "/auth/registration/": ["post"],
     "/auth/registration/resend-email/": ["post"],
     "/auth/registration/verify-email/": ["post"],
@@ -48,7 +48,8 @@ EXPECTED_ENDPOINTS = {
 
 # (path, method) -> required response fields, mirroring frontend/src/types.ts
 EXPECTED_RESPONSE_FIELDS = {
-    ("/auth/token/", "post"): {"access", "refresh"},
+    ("/auth/login/", "post"): {"access", "refresh"},
+    ("/auth/logout/", "post"): {"detail"},
     ("/auth/registration/", "post"): {"detail"},
     ("/auth/registration/resend-email/", "post"): {"detail"},
     ("/auth/registration/verify-email/", "post"): {"detail"},
@@ -147,6 +148,16 @@ def _get_success_response_properties(schema, path, method):
     response_schema = content.get("schema", {})
     if "$ref" in response_schema:
         response_schema = _resolve_ref(schema, response_schema["$ref"])
+
+    # Paginated responses wrap the items under `results` (DRF pagination).
+    if response_schema.get("type") == "object" and "results" in response_schema.get("properties", {}):
+        response_schema = response_schema["properties"]["results"]
+        if "$ref" in response_schema:
+            response_schema = _resolve_ref(schema, response_schema["$ref"])
+        items = response_schema.get("items", {})
+        if "$ref" in items:
+            items = _resolve_ref(schema, items["$ref"])
+        response_schema = items
 
     if response_schema.get("type") == "array":
         items = response_schema.get("items", {})

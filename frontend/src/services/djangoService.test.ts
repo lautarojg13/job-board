@@ -58,7 +58,7 @@ describe('djangoService - djangoFetch', () => {
     global.fetch = mockFetch;
 
     // JSON Request
-    await djangoFetch('/auth/token/', { method: 'POST', body: JSON.stringify({ user: 'test' }) });
+    await djangoFetch('/auth/login/', { method: 'POST', body: JSON.stringify({ user: 'test' }) });
     let headers = mockFetch.mock.calls[0][1]?.headers as Record<string, string>;
     expect(headers['Content-Type']).toBe('application/json');
 

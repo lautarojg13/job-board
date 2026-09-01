@@ -60,3 +60,5 @@ playwright-report/
 
 opencode.json
 .opencode/
+
+logs/

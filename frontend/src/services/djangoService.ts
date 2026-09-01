@@ -87,6 +87,8 @@ export async function djangoFetch<T>(
       !isRetry &&
       getStoredRefreshToken() &&
       endpoint !== '/auth/token/refresh/' &&
+      endpoint !== '/auth/login/' &&
+      endpoint !== '/auth/logout/' &&
       endpoint !== '/auth/token/' &&
       endpoint !== '/auth/token/blacklist/'
     ) {

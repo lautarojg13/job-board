@@ -15,7 +15,7 @@ export const Footer: React.FC<FooterProps> = ({
   return (
     <footer className="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
       <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <p>© 2026 JobBoard.io — Remote Engineering & Tech Career Portal</p>
+        <p>© 2026 JobBoard — Remote Engineering & Tech Career Portal</p>
         <div className="flex items-center space-x-4">
           {showDemoConfigUI && (
             <>
