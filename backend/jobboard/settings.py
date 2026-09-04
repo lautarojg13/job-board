@@ -53,8 +53,7 @@ INSTALLED_APPS = [
     'agents',
 
     'django_filters',
-    'django_celery_results',
-    
+
     'rest_framework_simplejwt.token_blacklist',
 ]
 
@@ -311,6 +310,7 @@ CELERY_RESULT_EXPIRES = 3600
 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 # Ollama
 OLLAMA_API_URL = config("OLLAMA_API_URL", default="http://localhost:11434/api/generate")
