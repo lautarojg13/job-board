@@ -34,8 +34,13 @@ def _extract_validation_message(exc):
 
     return str(detail)
 
-@shared_task
-def process_ai_search_task(user_prompt):
+@shared_task(
+    bind=True,
+    queue="ai",
+    time_limit=120,
+    soft_time_limit=90,
+)
+def process_ai_search_task(self, user_prompt):
     try:
         results = async_to_sync(get_jobs_by_agent_service)(user_prompt)
         jobs_data = [JobPostListSerializer(job).data for job in results]
@@ -49,8 +54,13 @@ def process_ai_search_task(user_prompt):
     
     return jobs_data
 
-@shared_task
-def analyze_resume_task(job_id, resume_text):
+@shared_task(
+    bind=True,
+    queue="ai",
+    time_limit=300,
+    soft_time_limit=240,
+)
+def analyze_resume_task(self, job_id, resume_text):
     job_post_info = get_job_post_info(job_id)
     
     agent = JobAssistantAgent()

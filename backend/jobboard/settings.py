@@ -306,11 +306,20 @@ REST_AUTH = {
 CELERY_BROKER_URL = config("CELERY_BROKER_URL")
 
 CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND")
-CELERY_RESULT_EXPIRES = 3600
+CELERY_RESULT_EXPIRES = config("CELERY_RESULT_EXPIRES", default=3600, cast=int)
 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+from kombu import Queue
+
+CELERY_TASK_QUEUES = (
+    Queue("default", routing_key="default"),
+    Queue("ai", routing_key="ai"),
+    Queue("email", routing_key="email"),
+)
+CELERY_TASK_DEFAULT_QUEUE = "default"
 
 # Ollama
 OLLAMA_API_URL = config("OLLAMA_API_URL", default="http://localhost:11434/api/generate")

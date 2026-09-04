@@ -27,6 +27,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    volumes:
+      - redis_data:/data
 
   ollama:
     image: ollama/ollama:latest
@@ -76,7 +78,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: celery_worker
-    command: celery -A jobboard worker --loglevel=info
+    command: celery -A jobboard worker --loglevel=info -Q default,ai,email
     volumes:
       - ./backend:/app
     env_file:
@@ -121,3 +123,4 @@ services:
 volumes:
   mysql_data:
   ollama_data:
+  redis_data:
