@@ -78,13 +78,18 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: celery_worker
-    command: celery -A jobboard worker --loglevel=info -Q default,ai,email
+    command: celery -A jobboard worker --loglevel=info -Q default,ai,email --concurrency=4 --max-tasks-per-child=100
     volumes:
       - ./backend:/app
     env_file:
       - .env
     environment:
       OLLAMA_API_URL: "http://ollama:11434/api/generate"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
     depends_on:
       db:
         condition: service_healthy
